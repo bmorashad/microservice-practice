@@ -42,22 +42,23 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
         Net:    "tcp",
         User:   "root",
         Passwd: "root",
-        Addr:   "localhost:3307",
+        Addr:   "db:3306",
         DBName: "ecommerce",
     }
-  // fmt.Println(cfg.FormatDSN())
+  fmt.Println(cfg.FormatDSN())
 
 	var err error
 	a.DB, err = sql.Open("mysql", cfg.FormatDSN())
   // connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4", user, password, host, port, dbname)
   // connectionString := fmt.Sprintf("root:root@tcp(docker.for.mac.localhost:3037)/ecommerce?charset=utf8mb4")
   // connectionString := fmt.Sprintf("root:root@tcp(localhost:3036)/ecommerce?charset=utf8mb4")
-  // connectionString := fmt.Sprintf("root:root@tcp(localhost:3037)/ecommerce?charset=utf8mb4")
+  // connectionString := fmt.Sprintf("root:root@tcp(localhost:3037)/ecommerce?allowNativePasswords=false&checkConnLiveness=false&maxAllowedPacket=0")
+  // connectionString := fmt.Sprintf("root:root@tcp(localhost:3037)/ecommerce?allowNativePasswords=false&checkConnLiveness=false&maxAllowedPacket=0")
+
   // fmt.Println("Connection String:> ", connectionString)
   // a.DB, err = sql.Open("mysql", connectionString)
 	if err != nil {
-    fmt.Println("IM HERE")
-    fmt.Println(err.Error())
+    fmt.Println("Error occurred while connecting to db:> ", err.Error())
 		log.Fatal(err)
 	}
 
@@ -68,7 +69,7 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	a.Router = mux.NewRouter()
 
 	a.initializeRoutes(promHandler)
-  // initDB(a.DB)
+  initDB(a.DB)
 }
 
 func initDB(db *sql.DB) {
