@@ -1,17 +1,14 @@
 package main
 
 import (
-	// "context"
 	"context"
 	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"log"
-	// "os"
+	"os"
 	"strings"
 	"time"
-
-	// "time"
 
 	"encoding/json"
 	"net/http"
@@ -29,27 +26,37 @@ type App struct {
 	DB     *sql.DB
 }
 
-func (a *App) Initializer(user, password, host, dbname string) {
+func (a *App) Initializer(user, password, host, port, dbname string) {
   // connectionString := fmt.Sprintf("postgres://%s:%s@server_postgres:5432/%s?sslmode=disable", user, password, dbname)
-  // connectionString := fmt.Sprintf("user=%s password=%s sslmode=disable", user, password)
+  // connectionString := fmt.Sprintf("user=%s password=%s  dbname=%s sslmode=disable", user, password, dbname)
+
    cfg := mysql.Config{
         // User:   os.Getenv("DBUSER"),
         // Passwd: os.Getenv("DBPASS"),
-        User:   user,
-        Passwd: password,
-        Net:    "tcp",
+        // User:   user,
+        // Passwd: password,
+        // Net:    "tcp",
         // Addr:   "127.0.0.1:3306",
         // Addr:   "localhost:3306",
-        Addr:   "server_mysql:3306",
+        // Addr:   "db:3306",
+        Net:    "tcp",
+        User:   "root",
+        Passwd: "root",
+        Addr:   "localhost:3307",
         DBName: "ecommerce",
-        // DBName: "recordings",
     }
+  // fmt.Println(cfg.FormatDSN())
 
-  // connectionString := fmt.Sprintf("postgres://%s:%s@%s:5432?sslmode=disable", user, password, host)
 	var err error
-  fmt.Println("This is DSN", cfg.FormatDSN())
 	a.DB, err = sql.Open("mysql", cfg.FormatDSN())
+  // connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4", user, password, host, port, dbname)
+  // connectionString := fmt.Sprintf("root:root@tcp(docker.for.mac.localhost:3037)/ecommerce?charset=utf8mb4")
+  // connectionString := fmt.Sprintf("root:root@tcp(localhost:3036)/ecommerce?charset=utf8mb4")
+  // connectionString := fmt.Sprintf("root:root@tcp(localhost:3037)/ecommerce?charset=utf8mb4")
+  // fmt.Println("Connection String:> ", connectionString)
+  // a.DB, err = sql.Open("mysql", connectionString)
 	if err != nil {
+    fmt.Println("IM HERE")
     fmt.Println(err.Error())
 		log.Fatal(err)
 	}
@@ -60,54 +67,41 @@ func (a *App) Initializer(user, password, host, dbname string) {
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 	a.Router = mux.NewRouter()
 
-	// anotherRouter := mux.NewRouter()
-	fmt.Println("Listen on 8011")
-	// anotherRouter.Handle("/newmetrics", promhttp.Handler())
-	// erro  := http.ListenAndServe(":8011", anotherRouter)
-	// if erro != nil {
-	//   fmt.Println("Error", erro.Error())
-	// }
-	// go func() {
-	//   http.ListenAndServe(":6060", nil)
-	// }()
 	a.initializeRoutes(promHandler)
-  initDB(a.DB)
+  // initDB(a.DB)
 }
 
 func initDB(db *sql.DB) {
+  // ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+  // defer cancelFunc()
+  // res, err := db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS ecommerce")  
+  // if err != nil {  
+  //   log.Printf("Error %s when creating DB\n", err)
+  //   return
+  // }
+  // no, err := res.RowsAffected()  
+  // if err != nil {  
+  //   log.Printf("Error %s when fetching rows", err)
+  //   return
+  // }
+  // log.Printf("rows affected: %d\n", no)  
   ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
   defer cancelFunc()
-  res, err := db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS ecommerce")  
-  if err != nil {  
-    log.Printf("Error %s when creating DB\n", err)
-    return
+  res, err := db.ExecContext(ctx, "CREATE TABLE IF NOT EXISTS products (id int not null auto_increment, name varchar(255), price varchar(255), PRIMARY KEY (id))")  
+  if err != nil {
+    log.Fatal("Error when creating products table: ", err)
   }
   no, err := res.RowsAffected()  
   if err != nil {  
-    log.Printf("Error %s when fetching rows", err)
-    return
-  }
-  log.Printf("rows affected: %d\n", no)  
-  ctx, cancelFunc = context.WithTimeout(context.Background(), 5*time.Second)
-  defer cancelFunc()
-  res, err = db.ExecContext(ctx, "CREATE TABLE IF NOT EXISTS products (id int not null auto_increment, name varchar(255), price varchar(255), PRIMARY KEY (id))")  
-  if err != nil {
-    log.Printf("Error %s ------- when creating products table", err)
-  }
-  if err != nil {  
-    log.Printf("Error %s when creating DB\n", err)
-    return
-  }
-  no, err = res.RowsAffected()  
-  if err != nil {  
-    log.Printf("Error %s when fetching rows", err)
+    log.Fatal("Error when fetching rows: ", err)
     return
   }
   log.Printf("rows affected: %d\n", no)  
 }
 
 func (a *App) Run(addr string) {
-  log.Fatal(http.ListenAndServe(":8010", a.Router))
+  serverPort := fmt.Sprintf(":%s", os.Getenv("SERVER_PORT"))
+  log.Fatal(http.ListenAndServe(serverPort, a.Router))
 
 }
 
