@@ -40,11 +40,14 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
         // Addr:   "localhost:3306",
         // Addr:   "db:3306",
         Net:    "tcp",
-        User:   "root",
-        Passwd: "root",
-        Addr:   "db:3306",
-        DBName: "ecommerce",
+        User:   user,
+        Passwd: password,
+        // Addr:   "db:3306",
+        // Addr:   "localhost:3307",
+        Addr:   fmt.Sprintf("%s:%s", host, port),
+        DBName: dbname,
     }
+
   fmt.Println(cfg.FormatDSN())
 
 	var err error
