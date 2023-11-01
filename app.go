@@ -76,6 +76,11 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 }
 
 func initDB(db *sql.DB) {
+  log.Printf("Hello there I'm working")  
+  log.Printf("Hello there I'm working")  
+  log.Printf(".")  
+  log.Printf("..")  
+  log.Printf("...")  
   // ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
   // defer cancelFunc()
   // res, err := db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS ecommerce")  
@@ -258,6 +263,10 @@ func (a *App) longRunningProcess(w http.ResponseWriter, r *http.Request) {
   respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
+func (a *App) ping(w http.ResponseWriter, r *http.Request) {
+  respondWithJSON(w, http.StatusOK, map[string]string{"result": "hello-world!"})
+}
+
 func (a *App) initializeRoutes(http.Handler) {
   a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
   a.Router.HandleFunc("/product", a.createProduct).Methods("POST")
@@ -265,6 +274,7 @@ func (a *App) initializeRoutes(http.Handler) {
   a.Router.HandleFunc("/product/{id:[0-9]+}", a.updateProduct).Methods("PUT")
   a.Router.HandleFunc("/product/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
   a.Router.HandleFunc("/create-products/random", a.longRunningProcess).Methods("GET")
+  a.Router.HandleFunc("/ping", a.ping).Methods("GET")
 
   // a.Router.Handle("/metrics", promhttp.Handler())
 }

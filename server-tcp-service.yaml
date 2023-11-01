@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: server
+spec:
+  type: NodePort
+  ports:
+    - name: "8010"
+      port: 8010
+      targetPort: 8010
+      nodePort: 30003
+    - name: "8012"
+      port: 8012
+      targetPort: 8012
+      nodePort: 30004
+  selector:
+    app: server
+  type: NodePort
