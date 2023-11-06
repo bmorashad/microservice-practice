@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: server
+  namespace: development
   labels:
     app: server
 spec:
@@ -40,4 +41,16 @@ spec:
               protocol: TCP
             - containerPort: 8012
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8010
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8010
+            initialDelaySeconds: 15
+            periodSeconds: 5
       restartPolicy: Always

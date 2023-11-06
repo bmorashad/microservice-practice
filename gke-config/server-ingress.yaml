@@ -1,0 +1,19 @@
+# https://kubernetes.io/docs/concepts/services-networking/ingress/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: server-ingress
+  namespace: development
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: server
+            port:
+              number: 8010
+---
+
