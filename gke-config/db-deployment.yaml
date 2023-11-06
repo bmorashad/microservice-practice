@@ -1,11 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: db
   labels:
     app: db
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: db
@@ -20,7 +20,7 @@ spec:
               value: ecommerce
             - name: MYSQL_ROOT_PASSWORD
               value: root
-          image: mysql:8.0
+          image: mysql:latest
           # livenessProbe:
           #   exec:
           #     command:

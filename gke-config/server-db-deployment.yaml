@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-db
+  labels:
+    app: server-db
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: server-db
+  template:
+    metadata:
+      labels:
+        app: server-db
+    spec:
+      containers:
+        - name: mysql
+          env:
+            - name: MYSQL_DATABASE
+              value: ecommerce
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+          image: mysql:8.0
+          # livenessProbe:
+          #   exec:
+          #     command:
+          #       - mysqladmin
+          #       - ping
+          #       - -h
+          #       - localhost
+          #   failureThreshold: 10
+          #   timeoutSeconds: 20
+          ports:
+            - containerPort: 3306
+              # hostPort: 3306
+              protocol: TCP
+        - name: image-server1
+          env:
+            - name: DB_NAME
+              value: ecommerce
+            - name: DB_PORT
+              value: "3306"
+            - name: HOST
+              # value: 192.168.58.2
+              value: mysql
+            - name: MYSQL_PASSWORD
+              value: root
+            - name: MYSQL_USER
+              value: root
+            - name: PPROF_PORT
+              value: "8012"
+            - name: SERVER_PORT
+              value: "8010"
+          image: mohammedrashad/my-go-app:latest
+          ports:
+            - containerPort: 8010
+              protocol: TCP
+            - containerPort: 8012
+              protocol: TCP
+
+      restartPolicy: Always

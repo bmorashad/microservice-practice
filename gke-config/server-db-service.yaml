@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-db
+spec:
+  type: LoadBalancer
+  selector:
+    app: server-db
+  ports:
+    # - name: "mysql"
+    - name: "3306"
+      port: 3306
+      targetPort: 3306
+      protocol: TCP
+    - name: "8010"
+      port: 8010
+      targetPort: 8010
+      protocol: TCP
+    - name: "8012"
+      port: 8012
+      targetPort: 8012
+      protocol: TCP
+
