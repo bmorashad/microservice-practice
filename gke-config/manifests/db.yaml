@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: db
-  namespace: development
+  namespace: istio-mesh
 spec:
   type: ClusterIP
   selector:
@@ -16,7 +16,7 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  namespace: development
+  namespace: istio-mesh
   name: db
   labels:
     app: db

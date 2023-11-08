@@ -1,0 +1,10 @@
+# https://kubernetes.io/docs/concepts/configuration/configmap/
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-server
+  namespace: istio-mesh
+data:
+  key: value
+---
+

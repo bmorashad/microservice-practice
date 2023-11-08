@@ -2,8 +2,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: server-ingress
-  namespace: development
+  name: my-ingress
+  namespace: istio-mesh
+  annotations:
+    kubernetes.io/ingress.class: istio
 spec:
   rules:
   - http:
