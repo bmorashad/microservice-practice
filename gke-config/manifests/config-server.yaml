@@ -5,6 +5,12 @@ metadata:
   name: config-server
   namespace: istio-mesh
 data:
-  key: value
+  MYSQL_USER: root
+  MYSQL_PASSWORD: root
+  DB_PORT: "3306"
+  SERVER_PORT: "8011"
+  PPROF_PORT: "8013"
+  HOST: db
+  DB_NAME: ecommerce
 ---
 

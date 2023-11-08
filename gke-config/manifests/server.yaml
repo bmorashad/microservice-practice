@@ -40,29 +40,32 @@ spec:
         app: server
     spec:
       containers:
-        - env:
-            - name: DB_NAME
-              value: ecommerce
-            - name: DB_PORT
-              value: "3306"
-            - name: HOST
-              # value: 192.168.58.2
-              value: db
-            - name: MYSQL_PASSWORD
-              value: root
-            - name: MYSQL_USER
-              value: root
-            - name: PPROF_PORT
-              value: "8012"
-            - name: SERVER_PORT
-              value: "8010"
-          image: mohammedrashad/my-go-app:v3
+        # - env:
+        #     - name: DB_NAME
+        #       value: ecommerce
+        #     - name: DB_PORT
+        #       value: "3306"
+        #     - name: HOST
+        #       # value: 192.168.58.2
+        #       value: db
+        #     - name: MYSQL_PASSWORD
+        #       value: root
+        #     - name: MYSQL_USER
+        #       value: root
+        #     - name: PPROF_PORT
+        #       value: "8012"
+        #     - name: SERVER_PORT
+        #       value: "8010"
+        - image: mohammedrashad/my-go-app:v3
           name: image-server1
           ports:
             - containerPort: 8010
               protocol: TCP
             - containerPort: 8012
               protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: config-server
           livenessProbe:
             httpGet:
               path: /ping
