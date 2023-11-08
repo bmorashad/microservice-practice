@@ -267,6 +267,11 @@ func (a *App) ping(w http.ResponseWriter, r *http.Request) {
   respondWithJSON(w, http.StatusOK, map[string]string{"result": "hello-world!"})
 }
 
+func (a *App) errorTest(w http.ResponseWriter, r *http.Request) {
+  // respondWithJSON(w, http.StatusForbidden, map[string]string{"result": "hello-world!"})
+  respondWithError(w, http.StatusForbidden, "Error occurred")
+}
+
 func (a *App) initializeRoutes(http.Handler) {
   a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
   a.Router.HandleFunc("/product", a.createProduct).Methods("POST")
@@ -275,6 +280,9 @@ func (a *App) initializeRoutes(http.Handler) {
   a.Router.HandleFunc("/product/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
   a.Router.HandleFunc("/create-products/random", a.longRunningProcess).Methods("GET")
   a.Router.HandleFunc("/ping", a.ping).Methods("GET")
+  a.Router.HandleFunc("/error", a.errorTest).Methods("GET")
+  // a.Router.HandleFunc("/healthz", a.ping).Methods("GET")
+  // a.Router.HandleFunc("/", a.ping).Methods("GET")
 
   // a.Router.Handle("/metrics", promhttp.Handler())
 }
