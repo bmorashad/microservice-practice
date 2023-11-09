@@ -1,0 +1,4 @@
+mesh:
+  name: istio
+  namespace: istio-mesh-helm
+

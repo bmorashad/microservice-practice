@@ -1,0 +1,23 @@
+# https://kubernetes.io/docs/concepts/services-networking/ingress/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  namespace: {{.Values.mesh.namespace}}
+  {{ if eq .Values.mesh.name "istio" }}
+  annotations:
+    kubernetes.io/ingress.class: istio
+  {{ end }}
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: server
+            port:
+              number: 8010
+---
+
