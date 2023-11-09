@@ -1,3 +1,5 @@
 mesh:
   name: linkerd
   namespace: linkerd-mesh-helm
+linkerd:
+  enabled: true

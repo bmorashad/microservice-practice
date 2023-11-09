@@ -1,4 +1,6 @@
 mesh:
   name: istio
   namespace: istio-mesh-helm
+istio:
+  enabled: true
 
