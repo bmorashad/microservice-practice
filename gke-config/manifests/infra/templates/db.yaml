@@ -51,4 +51,41 @@ spec:
             - containerPort: 3306
               # hostPort: 3306
               protocol: TCP
+          volumeMounts:
+          - name: db-persistent-storage
+            mountPath: /var/lib/mysql
       restartPolicy: Always
+  # volumes:
+  # - name: mysql-persistent-storage
+  #   persistentVolumeClaim:
+  #   claimName: mysql-pv-claim
+  volumeClaimTemplates:
+  - metadata:
+      name: db-persistent-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+# https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db
+  namespace: {{.Values.mesh.namespace}}
+  labels:
+    app: db
+spec:
+  # AKS: default,managed-premium
+  # GKE: standard
+  # EKS: gp2 (custom)
+  # Rook: rook-ceph-block,rook-ceph-fs
+  storageClassName: standard
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+
