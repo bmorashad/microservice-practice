@@ -73,9 +73,10 @@ func (a *App) generateRandomProductInfo() (product, error) {
   lastName := responseData.Results[0].Name.Last
   fullName := firstName + lastName 
   p.Name = fullName
-  priceGeneratorService := fmt.Sprintf("%s", os.Getenv("PRICE_SERVICE"))
+  priceGeneratorServiceHost := fmt.Sprintf("%s", os.Getenv("PRICE_SERVICE_HOST"))
+  priceGeneratorServicePort := fmt.Sprintf("%s", os.Getenv("PRICE_SERVICE_PORT"))
   var price int 
-  response, err = http.Get(fmt.Sprintf("http://%s/random-price/generate", priceGeneratorService))
+  response, err = http.Get(fmt.Sprintf("http://%s:%s/random-price/generate", priceGeneratorServiceHost, priceGeneratorServicePort))
   if err != nil {
     return product{}, err
   }

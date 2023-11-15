@@ -1,43 +1,58 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: merchant-backendconfig
+  namespace: {{.Values.mesh.namespace}}
+spec:
+  healthCheck:
+    checkIntervalSec: 15
+    timeoutSec: 15
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /ping
+    port: 5010
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: server
+  name: merchant
   namespace: {{.Values.mesh.namespace}}
   annotations:
-    cloud.google.com/backend-config: '{"default": "backendconfig"}'
+    cloud.google.com/backend-config: '{"default": "merchant-backendconfig"}'
     # cloud.google.com/app-protocols: '{"https":"HTTPS"}'
 spec:
   type: NodePort
   ports:
-    - name: "8010"
-      port: 8010
-      targetPort: 8010
+    - name: "merchant-5010"
+      port: 5010
+      targetPort: 5010
       protocol: TCP
-    - name: "8012"
-      port: 8012
-      targetPort: 8012
+    - name: "merchant-5012"
+      port: 5012
+      targetPort: 5012
       protocol: TCP
   selector:
-    app: server
+    app: merchant
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: server
+  name: merchant
   namespace: {{.Values.mesh.namespace}}
   labels:
-    app: server
+    app: merchant
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: server
+      app: merchant
   # strategy:
   #   type: Recreate
   template:
     metadata:
       labels:
-        app: server
+        app: merchant
     spec:
       containers:
         # - env:
@@ -56,12 +71,12 @@ spec:
         #       value: "8012"
         #     - name: SERVER_PORT
         #       value: "8010"
-        - image: mohammedrashad/my-go-app:v3
-          name: image-server1
+        - image: mohammedrashad/merchant:1
+          name: image-merchant
           ports:
-            - containerPort: 8010
+            - containerPort: 5010
               protocol: TCP
-            - containerPort: 8012
+            - containerPort: 5012
               protocol: TCP
           envFrom:
             - configMapRef:
@@ -69,13 +84,13 @@ spec:
           livenessProbe:
             httpGet:
               path: /ping
-              port: 8010
+              port: 5010
             initialDelaySeconds: 60
             periodSeconds: 5
           readinessProbe:
             httpGet:
               path: /ping
-              port: 8010
+              port: 5010
             initialDelaySeconds: 60
             periodSeconds: 5
       restartPolicy: Always

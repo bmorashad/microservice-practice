@@ -1,43 +1,58 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: price-gen-backendconfig
+  namespace: {{.Values.mesh.namespace}}
+spec:
+  healthCheck:
+    checkIntervalSec: 15
+    timeoutSec: 15
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /ping
+    port: 6010
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: server
+  name: price-gen
   namespace: {{.Values.mesh.namespace}}
   annotations:
-    cloud.google.com/backend-config: '{"default": "backendconfig"}'
+    cloud.google.com/backend-config: '{"default": "price-gen-backendconfig"}'
     # cloud.google.com/app-protocols: '{"https":"HTTPS"}'
 spec:
   type: NodePort
   ports:
-    - name: "8010"
-      port: 8010
-      targetPort: 8010
+    - name: "price-gen-6010"
+      port: 6010
+      targetPort: 6010
       protocol: TCP
-    - name: "8012"
-      port: 8012
-      targetPort: 8012
+    - name: "price-gen-6012"
+      port: 6012
+      targetPort: 6012
       protocol: TCP
   selector:
-    app: server
+    app: price-gen
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: server
+  name: price-gen
   namespace: {{.Values.mesh.namespace}}
   labels:
-    app: server
+    app: price-gen
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: server
+      app: price-gen
   # strategy:
   #   type: Recreate
   template:
     metadata:
       labels:
-        app: server
+        app: price-gen
     spec:
       containers:
         # - env:
@@ -53,15 +68,15 @@ spec:
         #     - name: MYSQL_USER
         #       value: root
         #     - name: PPROF_PORT
-        #       value: "8012"
+        #       value: "6012"
         #     - name: SERVER_PORT
-        #       value: "8010"
-        - image: mohammedrashad/my-go-app:v3
-          name: image-server1
+        #       value: "6010"
+        - image: mohammedrashad/price-gen:1
+          name: image-price-gen
           ports:
-            - containerPort: 8010
+            - containerPort: 6010
               protocol: TCP
-            - containerPort: 8012
+            - containerPort: 6012
               protocol: TCP
           envFrom:
             - configMapRef:
@@ -69,13 +84,13 @@ spec:
           livenessProbe:
             httpGet:
               path: /ping
-              port: 8010
+              port: 6010
             initialDelaySeconds: 60
             periodSeconds: 5
           readinessProbe:
             httpGet:
               path: /ping
-              port: 8010
+              port: 6010
             initialDelaySeconds: 60
             periodSeconds: 5
       restartPolicy: Always
