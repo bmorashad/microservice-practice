@@ -21,7 +21,8 @@ metadata:
   labels:
     app: db
 spec:
-  replicas: 2
+  serviceName: "mysql"
+  replicas: 1
   selector:
     matchLabels:
       app: db
@@ -30,6 +31,7 @@ spec:
       labels:
         app: db
     spec:
+      terminationGracePeriodSeconds: 10
       containers:
         - env:
             - name: MYSQL_DATABASE
@@ -52,40 +54,21 @@ spec:
               # hostPort: 3306
               protocol: TCP
           volumeMounts:
-          - name: db-persistent-storage
-            mountPath: /var/lib/mysql
-      restartPolicy: Always
-  # volumes:
-  # - name: mysql-persistent-storage
-  #   persistentVolumeClaim:
-  #   claimName: mysql-pv-claim
+            - name: db-persistent-storage
+              mountPath: /var/lib/mysql
+      # restartPolicy: Always
+      # volumes:
+      # - name: db-persistent-storage
+      #   persistentVolumeClaim:
+      #     claimName: db-pvc
+        # emptyDir: {}
   volumeClaimTemplates:
   - metadata:
       name: db-persistent-storage
     spec:
       accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Release.Name }}-storage
       resources:
         requests:
-          storage: 1Gi
+          storage: 10Gi
 ---
-# https://kubernetes.io/docs/concepts/storage/persistent-volumes/
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: db
-  namespace: {{.Values.mesh.namespace}}
-  labels:
-    app: db
-spec:
-  # AKS: default,managed-premium
-  # GKE: standard
-  # EKS: gp2 (custom)
-  # Rook: rook-ceph-block,rook-ceph-fs
-  storageClassName: standard
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
----
-

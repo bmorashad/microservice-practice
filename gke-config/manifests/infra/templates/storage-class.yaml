@@ -1,0 +1,16 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Release.Name }}-storage
+  # namespace: {{.Values.mesh.namespace}}
+  labels:
+    app.kubernetes.io/managed-by: Helm
+provisioner: kubernetes.io/gce-pd
+volumeBindingMode: Immediate
+# allowVolumeExpansion: true
+# reclaimPolicy: Delete
+reclaimPolicy: Retain
+parameters:
+  type: pd-standard
+  fstype: ext4
+  replication-type: none
