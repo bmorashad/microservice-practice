@@ -139,7 +139,7 @@ func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
   if start < 0 {
     start = 0
   }
-  products, err := getAllProducts(a.DB)
+  products, err := getProducts(a.DB, start, count)
   if err != nil {
     respondWithError(w, http.StatusInternalServerError, err.Error())
     return
