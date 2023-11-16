@@ -2,10 +2,13 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: {{.Values.mesh.namespace}}
-  {{if eq .Values.mesh.namespace "linkerd-mesh-helm"}}
   annotations:
+  {{if eq .Values.mesh.namespace "linkerd-mesh-helm"}}
     linkerd.io/inject: enabled
   {{end}}
+  # {{if eq .Values.mesh.namespace "istio-mesh-helm"}} use for pod level injection
+  #   sidecar.istio.io/inject: true
+  # {{end}}
   {{if eq .Values.mesh.namespace "istio-mesh-helm"}}
   labels:
     istio-injection: enabled

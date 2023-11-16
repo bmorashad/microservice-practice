@@ -111,7 +111,7 @@ func initDB(db *sql.DB) {
 }
 
 func (a *App) Run(addr string) {
-  serverPort := fmt.Sprintf(":%s", os.Getenv("SERVER_PORT"))
+  serverPort := fmt.Sprintf(":%s", os.Getenv("PRODUCTS_SERVICE_PORT"))
   log.Fatal(http.ListenAndServe(serverPort, a.Router))
 }
 
@@ -143,7 +143,25 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
   w.WriteHeader(code)
   w.Write(response)
 }
+
 func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
+  count, _ := strconv.Atoi(r.FormValue("count"))
+  start, _ := strconv.Atoi(r.FormValue("start"))
+  if count > 10 || count < 1 {
+    count = 10
+  }
+  if start < 0 {
+    start = 0
+  }
+  products, err := getProducts(a.DB, start, count)
+  if err != nil {
+    respondWithError(w, http.StatusInternalServerError, err.Error())
+    return
+  }
+  respondWithJSON(w, http.StatusOK, products)
+}
+
+func (a *App) getAllProducts(w http.ResponseWriter, r *http.Request) {
   count, _ := strconv.Atoi(r.FormValue("count"))
   start, _ := strconv.Atoi(r.FormValue("start"))
   if count > 10 || count < 1 {
@@ -267,7 +285,7 @@ func (a *App) deleteProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
-  products, err := getAllProducts(a.DB)
+  products, err := getProducts(a.DB, 0, 10)
   if err != nil {
     respondWithError(w, http.StatusInternalServerError, "Internal server error")
     return
@@ -276,11 +294,12 @@ func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
   if len(products) > 0 {
     lastProductCount = products[len(products)-1].ID
   }
+  for i := lastProductCount; i < 1; i++ {}
   if err != nil {
     respondWithError(w, http.StatusInternalServerError, err.Error())
     return
   }
-  for i := lastProductCount + 1; i < lastProductCount+1+10; i++ {
+  for i := 0; i < 10; i++ {
     go func() {
       randomProductServiceHost := fmt.Sprintf("%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_HOST"))
       randomProductServicePort := fmt.Sprintf("%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_PORT"))
@@ -349,6 +368,7 @@ func (a *App) truncate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) initializeRoutes(http.Handler) {
+  a.Router.HandleFunc("/products/all", a.getAllProducts).Methods("GET")
   a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
   a.Router.HandleFunc("/product", a.createProduct).Methods("POST")
   a.Router.HandleFunc("/product/{id:[0-9]+}", a.getProduct).Methods("GET")

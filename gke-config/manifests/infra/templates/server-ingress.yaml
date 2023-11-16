@@ -16,7 +16,7 @@ spec:
         pathType: ImplementationSpecific
         backend:
           service:
-            name: server
+            name: products
             port:
               number: 8010
 ---

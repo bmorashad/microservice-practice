@@ -92,7 +92,7 @@ func initDB(db *sql.DB) {
 }
 
 func (a *App) Run(addr string) {
-  serverPort := fmt.Sprintf(":%s", os.Getenv("SERVER_PORT"))
+  serverPort := fmt.Sprintf(":%s", os.Getenv("MERCHANT_SERVICE_PORT"))
   log.Fatal(http.ListenAndServe(serverPort, a.Router))
 
 }

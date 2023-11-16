@@ -41,7 +41,7 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 
 
 func (a *App) Run(addr string) {
-  serverPort := fmt.Sprintf(":%s", os.Getenv("SERVER_PORT"))
+  serverPort := fmt.Sprintf(":%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_PORT"))
   log.Fatal(http.ListenAndServe(serverPort, a.Router))
 
 }

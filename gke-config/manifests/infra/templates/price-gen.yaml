@@ -71,7 +71,7 @@ spec:
         #       value: "6012"
         #     - name: SERVER_PORT
         #       value: "6010"
-        - image: mohammedrashad/price-gen:1
+        - image: mohammedrashad/price-gen:2
           name: image-price-gen
           ports:
             - containerPort: 6010
