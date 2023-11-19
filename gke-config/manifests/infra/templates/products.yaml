@@ -53,6 +53,19 @@ spec:
     metadata:
       labels:
         app: products
+      annotations:
+      {{if eq .Values.mesh.namespace "linkerd-benchmark"}}
+        config.linkerd.io/proxy-cpu-limit: 1200m
+        config.linkerd.io/proxy-cpu-request: 500m
+        config.linkerd.io/proxy-memory-limit: 2.5Gi
+        config.linkerd.io/proxy-memory-request: 1Gi
+      {{end}}
+      {{if eq .Values.mesh.namespace "istio-benchmark"}}
+        sidecar.istio.io/proxyCPULimit: 1200m
+        sidecar.istio.io/proxyCPU: 500m
+        sidecar.istio.io/proxyMemoryLimit: 2.5Gi
+        sidecar.istio.io/proxyMemory: 1Gi
+      {{end}}
     spec:
       containers:
         # - env:
@@ -94,3 +107,8 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 5
       restartPolicy: Always
+      tolerations:
+      - key: "app-family"
+        operator: "Equal"
+        value: {{.Values.mesh.app-family}}
+        effect: "NoSchedule"

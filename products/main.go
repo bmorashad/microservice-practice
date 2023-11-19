@@ -21,5 +21,5 @@ func main() {
   }
   a := App{}
   a.Initializer(os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
-  a.Run(":8010")
+  a.Run()
 }

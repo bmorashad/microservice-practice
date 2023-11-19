@@ -53,6 +53,19 @@ spec:
     metadata:
       labels:
         app: merchant
+      annotations:
+      {{if eq .Values.mesh.namespace "linkerd-benchmark"}}
+        config.linkerd.io/proxy-cpu-limit: 300m
+        config.linkerd.io/proxy-cpu-request: 300m
+        config.linkerd.io/proxy-memory-limit: 700Mi
+        config.linkerd.io/proxy-memory-request: 500Mi
+      {{end}}
+      {{if eq .Values.mesh.namespace "istio-benchmark"}}
+        sidecar.istio.io/proxyCPULimit: 300m
+        sidecar.istio.io/proxyCPU: 300m
+        sidecar.istio.io/proxyMemoryLimit: 700Mi
+        sidecar.istio.io/proxyMemory: 500Mi
+      {{end}}
     spec:
       containers:
         # - env:
@@ -71,7 +84,7 @@ spec:
         #       value: "8012"
         #     - name: SERVER_PORT
         #       value: "8010"
-        - image: mohammedrashad/merchant:3
+        - image: mohammedrashad/merchant:4
           name: image-merchant
           ports:
             - containerPort: 5010
@@ -94,3 +107,8 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 5
       restartPolicy: Always
+      tolerations:
+      - key: "app-family"
+        operator: "Equal"
+        value: {{.Values.mesh.app-family}}
+        effect: "NoSchedule"

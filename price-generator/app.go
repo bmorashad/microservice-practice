@@ -2,7 +2,6 @@ package main
 
 import (
 	"math/rand"
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -18,10 +17,9 @@ import (
 
 type App struct {
 	Router *mux.Router
-	DB     *sql.DB
 }
 
-func (a *App) Initializer(user, password, host, port, dbname string) {
+func (a *App) Initializer() {
 	reg := prometheus.NewRegistry()
 	m := NewMetrics(reg)
 	m.concurrentExecutions.Set(2)
@@ -31,7 +29,7 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 }
 
 
-func (a *App) Run(addr string) {
+func (a *App) Run() {
   serverPort := fmt.Sprintf(":%s", os.Getenv("PRICE_SERVICE_PORT"))
   log.Fatal(http.ListenAndServe(serverPort, a.Router))
 

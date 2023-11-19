@@ -29,23 +29,11 @@ type App struct {
 var lastSentProductID = 0
 
 func (a *App) Initializer(user, password, host, port, dbname string) {
-  // connectionString := fmt.Sprintf("postgres://%s:%s@server_postgres:5432/%s?sslmode=disable", user, password, dbname)
-  // connectionString := fmt.Sprintf("user=%s password=%s  dbname=%s sslmode=disable", user, password, dbname)
 
    cfg := mysql.Config{
-        // User:   os.Getenv("DBUSER"),
-        // Passwd: os.Getenv("DBPASS"),
-        // User:   user,
-        // Passwd: password,
-        // Net:    "tcp",
-        // Addr:   "127.0.0.1:3306",
-        // Addr:   "localhost:3306",
-        // Addr:   "db:3306",
         Net:    "tcp",
         User:   user,
         Passwd: password,
-        // Addr:   "db:3306",
-        // Addr:   "localhost:3307",
         Addr:   fmt.Sprintf("%s:%s", host, port),
         DBName: dbname,
     }
@@ -54,14 +42,6 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 
 	var err error
 	a.DB, err = sql.Open("mysql", cfg.FormatDSN())
-  // connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4", user, password, host, port, dbname)
-  // connectionString := fmt.Sprintf("root:root@tcp(docker.for.mac.localhost:3037)/ecommerce?charset=utf8mb4")
-  // connectionString := fmt.Sprintf("root:root@tcp(localhost:3036)/ecommerce?charset=utf8mb4")
-  // connectionString := fmt.Sprintf("root:root@tcp(localhost:3037)/ecommerce?allowNativePasswords=false&checkConnLiveness=false&maxAllowedPacket=0")
-  // connectionString := fmt.Sprintf("root:root@tcp(localhost:3037)/ecommerce?allowNativePasswords=false&checkConnLiveness=false&maxAllowedPacket=0")
-
-  // fmt.Println("Connection String:> ", connectionString)
-  // a.DB, err = sql.Open("mysql", connectionString)
 	if err != nil {
     fmt.Println("Error occurred while connecting to db:> ", err.Error())
 		log.Fatal(err)
@@ -79,23 +59,6 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 }
 
 func initDB(db *sql.DB) {
-  log.Printf("Hello there I'm working")  
-  log.Printf(".")  
-  log.Printf("..")  
-  log.Printf("...")  
-  // ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
-  // defer cancelFunc()
-  // res, err := db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS ecommerce")  
-  // if err != nil {  
-  //   log.Printf("Error %s when creating DB\n", err)
-  //   return
-  // }
-  // no, err := res.RowsAffected()  
-  // if err != nil {  
-  //   log.Printf("Error %s when fetching rows", err)
-  //   return
-  // }
-  // log.Printf("rows affected: %d\n", no)  
   ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
   defer cancelFunc()
   res, err := db.ExecContext(ctx, "CREATE TABLE IF NOT EXISTS products (id int not null auto_increment, name varchar(255), price varchar(255), PRIMARY KEY (id))")  
@@ -110,7 +73,7 @@ func initDB(db *sql.DB) {
   log.Printf("rows affected: %d\n", no)  
 }
 
-func (a *App) Run(addr string) {
+func (a *App) Run() {
   serverPort := fmt.Sprintf(":%s", os.Getenv("PRODUCTS_SERVICE_PORT"))
   log.Fatal(http.ListenAndServe(serverPort, a.Router))
 }
@@ -380,6 +343,5 @@ func (a *App) initializeRoutes(http.Handler) {
   a.Router.HandleFunc("/error", a.errorTest).Methods("GET")
   // a.Router.HandleFunc("/healthz", a.ping).Methods("GET")
   // a.Router.HandleFunc("/", a.ping).Methods("GET")
-
   // a.Router.Handle("/metrics", promhttp.Handler())
 }

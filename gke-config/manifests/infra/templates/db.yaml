@@ -8,8 +8,8 @@ spec:
   selector:
     app: db
   ports:
-    # - name: "mysql"
-    - port: 3306
+    - name: "3306-mysql"
+      port: 3306 # if using other than default port - https://linkerd.io/2.14/features/protocol-detection/
       # targetPort: 3306
       protocol: TCP
 ---
@@ -30,6 +30,19 @@ spec:
     metadata:
       labels:
         app: db
+      annotations:
+      {{if eq .Values.mesh.namespace "linkerd-benchmark"}}
+        config.linkerd.io/proxy-cpu-limit: 1000m
+        config.linkerd.io/proxy-cpu-request: 500m
+        config.linkerd.io/proxy-memory-limit: 1Gi
+        config.linkerd.io/proxy-memory-request: 500Mi
+      {{end}}
+      {{if eq .Values.mesh.namespace "istio-benchmark"}}
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyCPU: 500m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyMemory: 500Mi
+      {{end}}
     spec:
       terminationGracePeriodSeconds: 10
       containers:
@@ -56,6 +69,11 @@ spec:
           volumeMounts:
             - name: db-persistent-storage
               mountPath: /var/lib/mysql
+      tolerations:
+      - key: "app-family"
+        operator: "Equal"
+        value: {{.Values.mesh.app-family}}
+        effect: "NoSchedule"
       # restartPolicy: Always
       # volumes:
       # - name: db-persistent-storage

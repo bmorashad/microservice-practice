@@ -1,3 +1,4 @@
 mesh:
   name: no-mesh
   namespace: no-mesh-benchmark
+  app-family: baseline
