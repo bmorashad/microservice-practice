@@ -24,11 +24,11 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: "products-8010"
+    - name: "http-products"
       port: 8010
       targetPort: 8010
       protocol: TCP
-    - name: "products-8012"
+    - name: "http-products-pprof"
       port: 8012
       targetPort: 8012
       protocol: TCP
@@ -84,7 +84,7 @@ spec:
         #       value: "8012"
         #     - name: SERVER_PORT
         #       value: "8010"
-        - image: mohammedrashad/products:3
+        - image: mohammedrashad/products:4
           name: image-products
           ports:
             - containerPort: 8010

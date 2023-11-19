@@ -24,11 +24,11 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: "random-product-gen-7010"
+    - name: "http-random-product-gen"
       port: 7010
       targetPort: 7010
       protocol: TCP
-    - name: "random-prodcut-gen-7012"
+    - name: "http-random-prodcut-gen-pprof"
       port: 7012
       targetPort: 7012
       protocol: TCP

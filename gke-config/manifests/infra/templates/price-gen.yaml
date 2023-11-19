@@ -24,11 +24,11 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: "price-gen-6010"
+    - name: "http-price-gen"
       port: 6010
       targetPort: 6010
       protocol: TCP
-    - name: "price-gen-6012"
+    - name: "http-price-gen-pprof"
       port: 6012
       targetPort: 6012
       protocol: TCP
