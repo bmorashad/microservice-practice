@@ -1,6 +1,6 @@
 mesh:
   name: istio
-  namespace: istio-mesh-helm
+  namespace: istio-benchmark
 istio:
   enabled: true
 

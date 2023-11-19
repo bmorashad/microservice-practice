@@ -1,5 +1,5 @@
 mesh:
   name: linkerd
-  namespace: linkerd-mesh-helm
+  namespace: linkerd-benchmark
 linkerd:
   enabled: true

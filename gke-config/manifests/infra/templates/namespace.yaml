@@ -3,13 +3,13 @@ kind: Namespace
 metadata:
   name: {{.Values.mesh.namespace}}
   annotations:
-  {{if eq .Values.mesh.namespace "linkerd-mesh-helm"}}
+  {{if eq .Values.mesh.namespace "linkerd-benchmark"}}
     linkerd.io/inject: enabled
   {{end}}
   # {{if eq .Values.mesh.namespace "istio-mesh-helm"}} use for pod level injection
   #   sidecar.istio.io/inject: true
   # {{end}}
-  {{if eq .Values.mesh.namespace "istio-mesh-helm"}}
+  {{if eq .Values.mesh.namespace "istio-benchmark"}}
   labels:
     istio-injection: enabled
   {{end}}
