@@ -1,7 +1,7 @@
 mesh:
   name: istio
   namespace: istio-benchmark
-  app-family: istio-meshed
+  appFamily: istio-meshed
 istio:
   enabled: true
 

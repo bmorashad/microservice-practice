@@ -32,14 +32,14 @@ spec:
         app: db
       annotations:
       {{if eq .Values.mesh.namespace "linkerd-benchmark"}}
-        config.linkerd.io/proxy-cpu-limit: 1000m
-        config.linkerd.io/proxy-cpu-request: 500m
+        config.linkerd.io/proxy-cpu-limit: 250m
+        config.linkerd.io/proxy-cpu-request: 100m
         config.linkerd.io/proxy-memory-limit: 1Gi
         config.linkerd.io/proxy-memory-request: 500Mi
       {{end}}
       {{if eq .Values.mesh.namespace "istio-benchmark"}}
-        sidecar.istio.io/proxyCPULimit: 1000m
-        sidecar.istio.io/proxyCPU: 500m
+        sidecar.istio.io/proxyCPULimit: 250m
+        sidecar.istio.io/proxyCPU: 100m
         sidecar.istio.io/proxyMemoryLimit: 1Gi
         sidecar.istio.io/proxyMemory: 500Mi
       {{end}}
@@ -72,7 +72,7 @@ spec:
       tolerations:
       - key: "app-family"
         operator: "Equal"
-        value: {{.Values.mesh.app-family}}
+        value: {{.Values.mesh.appFamily}}
         effect: "NoSchedule"
       # restartPolicy: Always
       # volumes:

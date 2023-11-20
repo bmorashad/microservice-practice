@@ -55,14 +55,14 @@ spec:
         app: random-product-gen
       annotations:
       {{if eq .Values.mesh.namespace "linkerd-benchmark"}}
-        config.linkerd.io/proxy-cpu-limit: 250m
-        config.linkerd.io/proxy-cpu-request: 250m
+        config.linkerd.io/proxy-cpu-limit: 161m
+        config.linkerd.io/proxy-cpu-request: 161m
         config.linkerd.io/proxy-memory-limit: 500Mi
         config.linkerd.io/proxy-memory-request: 500Mi
       {{end}}
       {{if eq .Values.mesh.namespace "istio-benchmark"}}
-        sidecar.istio.io/proxyCPULimit: 250m
-        sidecar.istio.io/proxyCPU: 250m
+        sidecar.istio.io/proxyCPULimit: 161m
+        sidecar.istio.io/proxyCPU: 161m
         sidecar.istio.io/proxyMemoryLimit: 500Mi
         sidecar.istio.io/proxyMemory: 500Mi
       {{end}}
@@ -110,5 +110,5 @@ spec:
       tolerations:
       - key: "app-family"
         operator: "Equal"
-        value: {{.Values.mesh.app-family}}
+        value: {{.Values.mesh.appFamily}}
         effect: "NoSchedule"

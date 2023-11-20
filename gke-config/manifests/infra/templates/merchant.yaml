@@ -55,14 +55,14 @@ spec:
         app: merchant
       annotations:
       {{if eq .Values.mesh.namespace "linkerd-benchmark"}}
-        config.linkerd.io/proxy-cpu-limit: 300m
-        config.linkerd.io/proxy-cpu-request: 300m
+        config.linkerd.io/proxy-cpu-limit: 200m
+        config.linkerd.io/proxy-cpu-request: 100m
         config.linkerd.io/proxy-memory-limit: 700Mi
         config.linkerd.io/proxy-memory-request: 500Mi
       {{end}}
       {{if eq .Values.mesh.namespace "istio-benchmark"}}
-        sidecar.istio.io/proxyCPULimit: 300m
-        sidecar.istio.io/proxyCPU: 300m
+        sidecar.istio.io/proxyCPULimit: 200m
+        sidecar.istio.io/proxyCPU: 100m
         sidecar.istio.io/proxyMemoryLimit: 700Mi
         sidecar.istio.io/proxyMemory: 500Mi
       {{end}}
@@ -110,5 +110,5 @@ spec:
       tolerations:
       - key: "app-family"
         operator: "Equal"
-        value: {{.Values.mesh.app-family}}
+        value: {{.Values.mesh.appFamily}}
         effect: "NoSchedule"

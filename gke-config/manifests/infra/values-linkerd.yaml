@@ -1,6 +1,6 @@
 mesh:
   name: linkerd
   namespace: linkerd-benchmark
-  app-family: linkerd-meshed
+  appFamily: linkerd-meshed
 linkerd:
   enabled: true
