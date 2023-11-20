@@ -1,13 +1,19 @@
 # https://kubernetes.io/docs/concepts/services-networking/ingress/
+{{ if .Values.mesh.ingressEnabled}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: my-ingress
   namespace: {{.Values.mesh.namespace}}
-  {{ if eq .Values.mesh.name "istio" }}
   annotations:
+  {{ if eq .Values.mesh.name "istio" }}
     kubernetes.io/ingress.class: istio
   {{ end }}
+  {{ if eq .Values.mesh.name "linkerd" }}
+    linkerd.io/inject: ingress
+    # ingress.kubernetes.io/custom-request-headers: "l5d-dst-override: products.linkerd-benchmark.svc.cluster.local:80"
+  {{ end }}
+
 spec:
   rules:
   - http:
@@ -19,5 +25,6 @@ spec:
             name: products
             port:
               number: 8010
+{{ end }}
 ---
 

@@ -22,7 +22,7 @@ metadata:
     cloud.google.com/backend-config: '{"default": "products-backendconfig"}'
     # cloud.google.com/app-protocols: '{"https":"HTTPS"}'
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
     - name: "http-products"
       port: 8010

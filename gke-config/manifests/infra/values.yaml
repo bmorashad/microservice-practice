@@ -2,3 +2,4 @@ mesh:
   name: no-mesh
   namespace: no-mesh-benchmark
   appFamily: baseline
+  ingressEnabled: false
