@@ -355,7 +355,34 @@ func (a *App) truncate(w http.ResponseWriter, r *http.Request) {
   respondWithJSON(w, http.StatusOK, "successfully truncated products table");
 }
 
+func (a *App) reset(w http.ResponseWriter, r *http.Request) {
+  lastSentProductID = 0
+  err := truncate(a.DB)
+  if err != nil {
+    log.Println("Error while truncating db for application reset", err)
+    respondWithError(w, http.StatusConflict, "Error while truncating products table")
+  }
+  merchantResetUrl := fmt.Sprintf("http://%s:%s/reset", os.Getenv("MERCHANT_SERVICE_HOST"), os.Getenv("MERCHANT_SERVICE_PORT"))
+  _, err = http.Get(merchantResetUrl)
+  if err != nil {
+    log.Println("Error while merchant application reset", err)
+    respondWithError(w, http.StatusConflict, "Error while merchant application reset")
+  }
+  respondWithJSON(w, http.StatusOK, map[string]string{"result": "application reset successfull"})
+}
+
+func (a *App) getProductCount(w http.ResponseWriter, r *http.Request) {
+  count, err := countProducts(a.DB)
+  if err != nil {
+    log.Println("Error while counting products", err)
+    respondWithError(w, http.StatusConflict, "Error occurred while truncating products table")
+  }
+  respondWithJSON(w, http.StatusOK, map[string]int{"productCount": count})
+}
+
 func (a *App) initializeRoutes(http.Handler) {
+  a.Router.HandleFunc("/reset", a.reset).Methods("GET")
+  a.Router.HandleFunc("/products/count", a.getProductCount).Methods("GET")
   a.Router.HandleFunc("/products/all", a.getAllProducts).Methods("GET")
   a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
   a.Router.HandleFunc("/product", a.createProduct).Methods("POST")

@@ -1,4 +1,13 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+  namespace: {{.Values.mesh.namespace}}
+data:
+  initdb.sql: |
+    SET GLOBAL max_connections = 10000;
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: db
@@ -45,6 +54,18 @@ spec:
       {{end}}
     spec:
       terminationGracePeriodSeconds: 10
+      # initContainers:
+      #   - name: init-db
+      #     image: mysql:latest
+      #     command: ["mysql"]
+      #     args:
+      #       - "-u"
+      #       - "root"
+      #       - "-proot"
+      #       - "-h"
+      #       - "db"
+      #       - "-e"
+      #       - "SET GLOBAL max_connections = 10000;"
       containers:
         - env:
             - name: MYSQL_DATABASE
@@ -69,6 +90,12 @@ spec:
           volumeMounts:
             - name: db-persistent-storage
               mountPath: /var/lib/mysql
+            - name: mysql-initdb
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: mysql-initdb
+          configMap:
+            name: mysql-initdb-config
       tolerations:
       - key: "app-family"
         operator: "Equal"

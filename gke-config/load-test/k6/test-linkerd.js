@@ -6,8 +6,14 @@ import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
 
 export const options = k6SMLoadOptions
 
+var baseUrl = 'http://34.126.89.43:8010'
+
+export function setup() {
+    let r = http.get(`${baseUrl}/reset`);
+    console.info("product reset result:", r.status);
+}
+
 export default function() {
-  let baseUrl = 'http://34.126.78.156:8010'
   apiEndpoints.forEach(api => {
     let r = http.get(`${baseUrl}${api}`);
     // console.log(r.json());
@@ -20,8 +26,15 @@ export default function() {
 
 export function handleSummary(data) {
   return {
-    'linkerd-summary.json': JSON.stringify(data), //the default data object
+    "linkerd-summary.json": JSON.stringify(data), //the default data object
     "linkerd-summary.html": htmlReport(data),
     stdout: textSummary(data, { indent: '→', enableColors: true }),
   };
+}
+
+export function teardown(params) {
+  let r = http.get(`${baseUrl}/products/count`);
+  console.info("products count:", r.json())
+  r = http.get(`${baseUrl}/reset`);
+  console.info("product reset result:", r.status);
 }

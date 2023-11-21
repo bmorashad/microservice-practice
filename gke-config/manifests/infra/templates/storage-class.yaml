@@ -6,7 +6,8 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: Helm
 provisioner: kubernetes.io/gce-pd
-volumeBindingMode: Immediate
+# volumeBindingMode: Immediate
+volumeBindingMode: WaitForFirstConsumer
 # allowVolumeExpansion: true
 # reclaimPolicy: Delete
 reclaimPolicy: Retain

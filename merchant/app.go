@@ -127,7 +127,18 @@ func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
   respondWithJSON(w, http.StatusOK, products)
 }
 
+func (a *App) reset(w http.ResponseWriter, r *http.Request) {
+  lastSentProductID = 0
+  err := truncate(a.DB)
+  if err != nil {
+    log.Println("Error while truncating db for application reset", err)
+    respondWithError(w, http.StatusConflict, "Error occurred while truncating products table")
+  }
+  respondWithJSON(w, http.StatusOK, map[string]string{"result": "application reset successfull"})
+}
+
 func (a *App) initializeRoutes(http.Handler) {
+  a.Router.HandleFunc("/reset", a.reset).Methods("GET")
   a.Router.HandleFunc("/receive/products", a.receiveProducts).Methods("POST")
   a.Router.HandleFunc("/ping", a.ping).Methods("GET")
   a.Router.HandleFunc("/merchant/products", a.getProducts).Methods("GET")

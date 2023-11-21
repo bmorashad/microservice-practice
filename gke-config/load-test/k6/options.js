@@ -1,21 +1,21 @@
 export const k6SMLoadOptions = {
-  discardResponseBodies: true,
+  // discardResponseBodies: true,
   scenarios: {
-    // shared_iter_scenario: {
-    //   executor: "shared-iterations",
-    //   vus: 10,
-    //   iterations: 1000,
-    //   // startTime: "0s",
-    //   gracefulStop: '5s',
-    // },
-    per_vu_scenario: {
-      executor: "per-vu-iterations",
+    shared_iter_scenario: {
+      executor: "shared-iterations",
       vus: 10,
       iterations: 1000,
-      // startTime: "10s",
-      gracefulStop: '2s'
+      // startTime: "0s",
+      gracefulStop: '5s',
     },
-    // constant_vus: {
+    // per_vu_scenario: {
+    //   executor: "per-vu-iterations",
+    //   vus: 10,
+    //   iterations: 10,
+    //   // startTime: "10s",
+    //   gracefulStop: '2s'
+    // },
+    // // constant_vus: {
     //   executor: 'constant-vus',
     //   vus: 20,
     //   duration: '30s',
