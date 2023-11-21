@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"time"
+  "sync"
 
 	"encoding/json"
 	"net/http"
@@ -182,6 +183,20 @@ func (a *App) updateProduct(w http.ResponseWriter, r *http.Request) {
   respondWithJSON(w, http.StatusOK, p)
 }
 
+func logProductCount(db *sql.DB) {
+  uptimeTicker := time.NewTicker(10 * time.Second)
+  for {
+    select {
+    case <- uptimeTicker.C:
+      count, err := countProducts(db)
+      if err != nil {
+        log.Println("Error occurred while counting products:", err)
+      }
+      log.Println(count, "products are in the table")
+    }
+  }
+}
+
 func productToMerchantBatchProcess(db *sql.DB) {
   uptimeTicker := time.NewTicker(5 * time.Second)
   for {
@@ -245,51 +260,83 @@ func (a *App) deleteProduct(w http.ResponseWriter, r *http.Request) {
   respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
-func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
+func (a *App) callProductsApi() error {
   products, err := getProducts(a.DB, 0, 10)
   if err != nil {
-    respondWithError(w, http.StatusInternalServerError, "Internal server error")
-    return
+    log.Println("Error occurred while calling products api:", err)
+    return err
   }
   lastProductCount := 1
   if len(products) > 0 {
     lastProductCount = products[len(products)-1].ID
   }
   for i := lastProductCount; i < 1; i++ {}
+  return nil
+}
+
+func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
+  err := a.callProductsApi()
   if err != nil {
-    respondWithError(w, http.StatusInternalServerError, err.Error())
+    respondWithError(w, http.StatusInternalServerError, "Internal server error")
     return
   }
-  for i := 0; i < 10; i++ {
-    go func() {
-      randomProductServiceHost := fmt.Sprintf("%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_HOST"))
-      randomProductServicePort := fmt.Sprintf("%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_PORT"))
-      var product = &product{}
-      response, err := http.Get(fmt.Sprintf("http://%s:%s/random-product/info", randomProductServiceHost, randomProductServicePort))
-      if err != nil {
-        log.Println("Error occurred: ", err)
-        return
-      }
-      if response.Status != "200" {
-        response, err = http.Get(fmt.Sprintf("http://%s:%s/random-product/info", randomProductServiceHost, randomProductServicePort))
-        if err != nil {
-          log.Println("Error occurred: ", err)
-        }
-      }
-      err = json.NewDecoder(response.Body).Decode(&product)
-
-      if err != nil {
-        log.Println("Error reading response body:", err)
-      }
-
-      _, err = product.createProduct(a.DB)
-      if err != nil {
-        log.Println("Error occurred while creating random product:", err)
-      }
-      log.Println("Created random product:", product)
-    }()
+  numOfRandProductsToCreate := 10
+  var wg sync.WaitGroup
+  // wg.Add(numOfRandProductsToCreate)
+  var mu sync.Mutex
+  createdProductCount := 0
+  for i := 0; i < numOfRandProductsToCreate; i++ {
+    go _createRandomProducts(a.DB, &createdProductCount, &wg, &mu)
   }
+  // wg.Wait()
+  // ch := make(chan bool)
+  // go func() {
+  //   {
+  //     <-ch
+  //     log.Println("Successfully created product count:", createdProductCount)
+  //     createdProductCount = 0
+  //     close(ch)
+  //   }
+  // }()
   respondWithJSON(w, http.StatusOK, map[string]string{"result": "started random products creation"})
+}
+
+func _createRandomProducts(db *sql.DB, cpc *int, wg *sync.WaitGroup, mu *sync.Mutex) {
+  // defer wg.Done()
+  randomProductServiceHost := fmt.Sprintf("%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_HOST"))
+  randomProductServicePort := fmt.Sprintf("%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_PORT"))
+  var product = &product{}
+  response, err := http.Get(fmt.Sprintf("http://%s:%s/random-product/info", randomProductServiceHost, randomProductServicePort))
+  if err != nil {
+    log.Println("Error occurred while calling random-product-info: ", err)
+    return
+  }
+  if response.Status != "200" {
+    response, err = http.Get(fmt.Sprintf("http://%s:%s/random-product/info", randomProductServiceHost, randomProductServicePort))
+    if err != nil {
+      log.Println("Error while calling random-product: ", err)
+      log.Println("Here is the response", response)
+      return
+    }
+  }
+  err = json.NewDecoder(response.Body).Decode(&product)
+
+  if err != nil {
+    log.Println("Error while reading response body:", err)
+    log.Println("Here is the response", response)
+    return
+  }
+
+  _, err = product.createProduct(db)
+  if err != nil {
+    log.Println("Error while creating random product:", err)
+  }
+
+  // mu.Lock()
+  // *cpc += 1
+  // mu.Unlock()
+  
+  // log.Println("Created random product:", product)
 }
 
 func (a *App) ping(w http.ResponseWriter, r *http.Request) {

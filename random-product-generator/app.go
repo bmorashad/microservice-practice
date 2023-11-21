@@ -115,7 +115,7 @@ func generatePrice() (int, error) {
 func (a *App) generateRandomProduct(w http.ResponseWriter, r *http.Request) {
   p, err := a.generateRandomProductInfoFromList()
   if err != nil {
-    log.Println(err)
+    log.Println("Error occurred while generating price:", err)
     respondWithError(w, http.StatusInternalServerError, "error occurred while generating product")
   }
   respondWithJSON(w, http.StatusCreated, p)

@@ -11,7 +11,7 @@ export const k6SMLoadOptions = {
     per_vu_scenario: {
       executor: "per-vu-iterations",
       vus: 10,
-      iterations: 10000,
+      iterations: 1000,
       // startTime: "10s",
       gracefulStop: '2s'
     },

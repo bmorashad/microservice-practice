@@ -52,8 +52,17 @@ func getAllProducts(db *sql.DB) ([]product, error) {
   }
   return products, nil
 }
+
+func countProducts(db *sql.DB) (int, error) {
+  var count int
+  err := db.QueryRow("SELECT COUNT(*) FROM products").Scan(&count)
+  if err != nil {
+    return -1, nil
+  }
+  return count, nil
+}
+
 func getProducts(db *sql.DB, start, count int) ([]product, error) {
-  log.Println("Start:", start, "Count:", count)
   rows, err := db.Query(
     "SELECT id, name, price FROM products LIMIT ? OFFSET ?", 
     count, start)
