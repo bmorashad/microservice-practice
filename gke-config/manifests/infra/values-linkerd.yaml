@@ -1,7 +1,7 @@
 mesh:
   name: linkerd
   namespace: linkerd-benchmark
-  appFamily: istio-meshed
+  appFamily: linkerd-meshed-big
   ingressEnabled: false
 linkerd:
   enabled: true

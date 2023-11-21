@@ -55,16 +55,16 @@ spec:
         app: random-product-gen
       annotations:
       {{if eq .Values.mesh.namespace "linkerd-benchmark"}}
-        config.linkerd.io/proxy-cpu-limit: 161m
-        config.linkerd.io/proxy-cpu-request: 161m
-        config.linkerd.io/proxy-memory-limit: 500Mi
-        config.linkerd.io/proxy-memory-request: 500Mi
+        config.linkerd.io/proxy-cpu-limit: 1000m
+        config.linkerd.io/proxy-cpu-request: 1000m
+        config.linkerd.io/proxy-memory-limit: 2.5Gi
+        config.linkerd.io/proxy-memory-request: 2Gi
       {{end}}
       {{if eq .Values.mesh.namespace "istio-benchmark"}}
-        sidecar.istio.io/proxyCPULimit: 161m
-        sidecar.istio.io/proxyCPU: 161m
-        sidecar.istio.io/proxyMemoryLimit: 500Mi
-        sidecar.istio.io/proxyMemory: 500Mi
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyCPU: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 2.5Gi
+        sidecar.istio.io/proxyMemory: 2Gi
       {{end}}
     spec:
       containers:
@@ -84,7 +84,7 @@ spec:
         #       value: "8012"
         #     - name: SERVER_PORT
         #       value: "8010"
-        - image: mohammedrashad/random-product-gen:3
+        - image: mohammedrashad/random-product-gen:5
           name: image-radnom-product-gen
           ports:
             - containerPort: 7010

@@ -35,12 +35,12 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
         DBName: dbname,
     }
 
-  fmt.Println(cfg.FormatDSN())
+  log.Println(cfg.FormatDSN())
 
 	var err error
 	a.DB, err = sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
-    fmt.Println("Error occurred while connecting to db:> ", err.Error())
+    log.Println("Error occurred while connecting to db:> ", err.Error())
 		log.Fatal(err)
 	}
 
@@ -86,10 +86,10 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 }
 
 func (a *App) receiveProducts(w http.ResponseWriter, r *http.Request) {
-  fmt.Println("Product Received")
   var products []product
   decoder := json.NewDecoder(r.Body)
   if err := decoder.Decode(&products); err != nil {
+    log.Println("Error corred while decoding received product:", err)
     respondWithError(w, http.StatusBadRequest, "Invalid payload")
     return
   }
@@ -97,15 +97,17 @@ func (a *App) receiveProducts(w http.ResponseWriter, r *http.Request) {
 
   for _, p := range products {
     if _, err := p.createProduct(a.DB); err != nil {
+      log.Println("Error corred while storing merchant product:", err)
       respondWithError(w, http.StatusInternalServerError, err.Error())
       return
     }
   }
+  log.Println("Successfully stored received product")
   respondWithJSON(w, http.StatusCreated, products)
 }
 
 func (a *App) ping(w http.ResponseWriter, r *http.Request) {
-  respondWithJSON(w, http.StatusOK, map[string]string{"result": "hello-world!"})
+  respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
 func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {

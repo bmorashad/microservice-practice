@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -38,12 +37,12 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
         DBName: dbname,
     }
 
-  fmt.Println(cfg.FormatDSN())
+  log.Println(cfg.FormatDSN())
 
 	var err error
 	a.DB, err = sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
-    fmt.Println("Error occurred while connecting to db:> ", err.Error())
+    log.Println("Error occurred while connecting to db:> ", err.Error())
 		log.Fatal(err)
 	}
 
@@ -110,7 +109,8 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
   count, _ := strconv.Atoi(r.FormValue("count"))
   start, _ := strconv.Atoi(r.FormValue("start"))
-  if count > 10 || count < 1 {
+  // if count > 10 || count < 1 {
+  if count < 1 {
     count = 10
   }
   if start < 0 {
@@ -183,7 +183,7 @@ func (a *App) updateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func productToMerchantBatchProcess(db *sql.DB) {
-  uptimeTicker := time.NewTicker(3 * time.Second)
+  uptimeTicker := time.NewTicker(5 * time.Second)
   for {
     select {
     case <- uptimeTicker.C:
@@ -193,39 +193,38 @@ func productToMerchantBatchProcess(db *sql.DB) {
 }
 
 func sendProductsToMerchant(db *sql.DB) {
-  fmt.Println("Sending product to merchant")
-  products, err := getProducts(db, lastSentProductID, lastSentProductID+10)
+  products, err := getProducts(db, lastSentProductID, 20)
   if err != nil {
-    fmt.Println(err)
+    log.Println(err)
   }
-  fmt.Println("Len of products", len(products))
   if len(products) > 0 {
     lastProductId := products[len(products) - 1].ID
     firstProductId := products[0].ID
-    fmt.Println("Last Product ID:", lastProductId)
-    fmt.Println("First Product ID:", firstProductId)
-    fmt.Println("Last Sent Product ID:",lastSentProductID)
     if lastProductId == lastSentProductID {
       return
     }
-    _sendToMerchant(products)
+    err = _sendToMerchant(products)
+    if err != nil {
+      log.Println("Error occurred while sending products to merchant:", err)
+      return
+    }
     lastSentProductID = lastSentProductID+len(products)
+    log.Println(len(products),  "products sent to merchant -", "from ID:", firstProductId, "to ID:", lastProductId, "Last sent product ID:", lastSentProductID)
   }
 }
 
-func _sendToMerchant(products []product) {
+func _sendToMerchant(products []product) error {
   merchantUrl := fmt.Sprintf("http://%s:%s/receive/products", os.Getenv("MERCHANT_SERVICE_HOST"), os.Getenv("MERCHANT_SERVICE_PORT"))
   jsonProducts, err := json.Marshal(products)
   if err != nil {
-    fmt.Println("Error marshalling JSON: ", err)
-    return
+    return err
   }
   resp, err := http.Post(merchantUrl, "application/json", bytes.NewBuffer(jsonProducts))
   if err != nil {
-    fmt.Println("Error occurred while sending ", err)
-    return
+    return err
   }
   defer resp.Body.Close()
+  return nil
 }
 
 
@@ -243,7 +242,6 @@ func (a *App) deleteProduct(w http.ResponseWriter, r *http.Request) {
     respondWithError(w, http.StatusInternalServerError, err.Error())
     return
   }
-
   respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
@@ -269,49 +267,29 @@ func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
       var product = &product{}
       response, err := http.Get(fmt.Sprintf("http://%s:%s/random-product/info", randomProductServiceHost, randomProductServicePort))
       if err != nil {
-        fmt.Println(err)
+        log.Println("Error occurred: ", err)
         return
       }
       if response.Status != "200" {
         response, err = http.Get(fmt.Sprintf("http://%s:%s/random-product/info", randomProductServiceHost, randomProductServicePort))
         if err != nil {
-          fmt.Println(err)
-          return
+          log.Println("Error occurred: ", err)
         }
       }
       err = json.NewDecoder(response.Body).Decode(&product)
-      // body, err := ioutil.ReadAll(response.Body)
-      // fmt.Println("Response Status:", response)
-      // fmt.Println("Response Status:", response.Status)
-      // fmt.Println("Response Body:", string(body))
 
       if err != nil {
-        log.Fatal("Error reading response body:", err)
+        log.Println("Error reading response body:", err)
       }
 
-      fmt.Println("This is product", product)
       _, err = product.createProduct(a.DB)
       if err != nil {
-        respondWithError(w, http.StatusInternalServerError, err.Error())
-        return
+        log.Println("Error occurred while creating random product:", err)
       }
+      log.Println("Created random product:", product)
     }()
   }
-  go func() error {
-    response, err := http.Get("https://pokeapi.co/api/v2/pokedex/kanto/")
-    if err != nil {
-      fmt.Println(err.Error())
-      return err
-    }
-    responseData, err := ioutil.ReadAll(response.Body)
-    if err != nil {
-      fmt.Println(err.Error())
-      return err
-    }
-    fmt.Println(string(responseData[0]))
-    return nil
-  }()
-  respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+  respondWithJSON(w, http.StatusOK, map[string]string{"result": "started random products creation"})
 }
 
 func (a *App) ping(w http.ResponseWriter, r *http.Request) {

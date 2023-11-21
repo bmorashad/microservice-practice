@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+	// "time"
 
 	"encoding/json"
 	"net/http"
@@ -54,7 +56,22 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
   w.Write(response)
 }
 
-func (a *App) generateRandomProductInfo() (product, error) {
+func (a *App) generateRandomProductInfoFromList() (product, error) {
+  names := []string{"Milk", "Ice Cream", "Yourgut", "Car", "Van", "T-Shirt", "Cookies"}
+  // rand.Seed(time.Now().Unix())
+  pickedName := names[rand.Intn(len(names))]
+  var p = product{}
+  p.Name = pickedName
+  price, err := generatePrice()
+  if err != nil {
+    return product{}, err
+  }
+  p.Price = price
+  // p.Price = 400
+  return p, nil
+}
+
+func (a *App) generateRandomProductInfoFromFakeApi() (product, error) {
   var p = product{}
   response, err := http.Get("https://randomuser.me/api/?results=1")
   if err != nil {
@@ -71,23 +88,34 @@ func (a *App) generateRandomProductInfo() (product, error) {
   lastName := responseData.Results[0].Name.Last
   fullName := firstName + lastName 
   p.Name = fullName
-  priceGeneratorServiceHost := fmt.Sprintf("%s", os.Getenv("PRICE_SERVICE_HOST"))
-  priceGeneratorServicePort := fmt.Sprintf("%s", os.Getenv("PRICE_SERVICE_PORT"))
-  var price int 
-  response, err = http.Get(fmt.Sprintf("http://%s:%s/random-price/generate", priceGeneratorServiceHost, priceGeneratorServicePort))
+  price, err := generatePrice()
   if err != nil {
     return product{}, err
   }
-  err = json.NewDecoder(response.Body).Decode(&price)
   p.Price = price
   // p.Price = 400
   return p, nil
 }
 
-func (a *App) generateRandomProduct(w http.ResponseWriter, r *http.Request) {
-  p, err := a.generateRandomProductInfo()
+func generatePrice() (int, error) {
+  priceGeneratorServiceHost := fmt.Sprintf("%s", os.Getenv("PRICE_SERVICE_HOST"))
+  priceGeneratorServicePort := fmt.Sprintf("%s", os.Getenv("PRICE_SERVICE_PORT"))
+  var price int 
+  response, err := http.Get(fmt.Sprintf("http://%s:%s/random-price/generate", priceGeneratorServiceHost, priceGeneratorServicePort))
   if err != nil {
-    fmt.Println(err)
+    return -1, err
+  }
+  err = json.NewDecoder(response.Body).Decode(&price)
+  if err != nil {
+    return -1, err
+  }
+  return price, nil
+}
+
+func (a *App) generateRandomProduct(w http.ResponseWriter, r *http.Request) {
+  p, err := a.generateRandomProductInfoFromList()
+  if err != nil {
+    log.Println(err)
     respondWithError(w, http.StatusInternalServerError, "error occurred while generating product")
   }
   respondWithJSON(w, http.StatusCreated, p)

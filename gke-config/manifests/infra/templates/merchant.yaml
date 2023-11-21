@@ -84,7 +84,7 @@ spec:
         #       value: "8012"
         #     - name: SERVER_PORT
         #       value: "8010"
-        - image: mohammedrashad/merchant:4
+        - image: mohammedrashad/merchant:5
           name: image-merchant
           ports:
             - containerPort: 5010

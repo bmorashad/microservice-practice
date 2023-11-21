@@ -55,16 +55,16 @@ spec:
         app: products
       annotations:
       {{if eq .Values.mesh.namespace "linkerd-benchmark"}}
-        config.linkerd.io/proxy-cpu-limit: 711m
-        config.linkerd.io/proxy-cpu-request: 500m
+        config.linkerd.io/proxy-cpu-limit: 3500m
+        config.linkerd.io/proxy-cpu-request: 3000m
         config.linkerd.io/proxy-memory-limit: 2.5Gi
-        config.linkerd.io/proxy-memory-request: 1Gi
+        config.linkerd.io/proxy-memory-request: 2Gi
       {{end}}
       {{if eq .Values.mesh.namespace "istio-benchmark"}}
-        sidecar.istio.io/proxyCPULimit: 711m
-        sidecar.istio.io/proxyCPU: 500m
+        sidecar.istio.io/proxyCPULimit: 3500m
+        sidecar.istio.io/proxyCPU: 3000m
         sidecar.istio.io/proxyMemoryLimit: 2.5Gi
-        sidecar.istio.io/proxyMemory: 1Gi
+        sidecar.istio.io/proxyMemory: 2Gi
       {{end}}
     spec:
       containers:
@@ -84,7 +84,7 @@ spec:
         #       value: "8012"
         #     - name: SERVER_PORT
         #       value: "8010"
-        - image: mohammedrashad/products:4
+        - image: mohammedrashad/products:5
           name: image-products
           ports:
             - containerPort: 8010

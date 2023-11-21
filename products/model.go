@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 )
 
@@ -54,7 +53,7 @@ func getAllProducts(db *sql.DB) ([]product, error) {
   return products, nil
 }
 func getProducts(db *sql.DB, start, count int) ([]product, error) {
-  fmt.Println("Start & Count: ", start, count)
+  log.Println("Start:", start, "Count:", count)
   rows, err := db.Query(
     "SELECT id, name, price FROM products LIMIT ? OFFSET ?", 
     count, start)
