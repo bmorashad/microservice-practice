@@ -79,5 +79,4 @@ func getProducts(db *sql.DB, start, count int) ([]product, error) {
       products = append(products, p)
     }
     return products, nil
-
   }

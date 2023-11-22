@@ -8,20 +8,20 @@ export const k6SMLoadOptions = {
     //   // startTime: "0s",
     //   gracefulStop: '5s',
     // },
-    // per_vu_scenario: {
-    //   executor: "per-vu-iterations",
-    //   vus: 10,
-    //   iterations: 100,
-    //   // duration: '30s',
-    //   // startTime: "10s",
-    //   gracefulStop: '2s'
-    // },
-    constant_vus: {
-      executor: 'constant-vus',
-      vus: 50,
-      duration: '60s',
+    per_vu_scenario: {
+      executor: "per-vu-iterations",
+      vus: 10,
+      iterations: 3000,
+      // duration: '30s',
+      // startTime: "10s",
       gracefulStop: '2s'
     },
+    // constant_vus: {
+    //   executor: 'constant-vus',
+    //   vus: 50,
+    //   duration: '60s',
+    //   gracefulStop: '2s'
+    // },
     // ramping_vus: {
     //   executor: "ramping-vus",
     //   startvus: 0,

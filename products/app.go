@@ -6,9 +6,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	// "math/rand"
 	"os"
+	"sync"
 	"time"
-  "sync"
 
 	"encoding/json"
 	"net/http"
@@ -24,6 +25,13 @@ import (
 type App struct {
 	Router *mux.Router
 	DB     *sql.DB
+}
+
+type ErrLog struct {
+  message string
+  err error
+  resp *http.Response
+  count int
 }
 
 var lastSentProductID = 0
@@ -210,7 +218,7 @@ func productToMerchantBatchProcess(db *sql.DB) {
 func sendProductsToMerchant(db *sql.DB) {
   products, err := getProducts(db, lastSentProductID, 20)
   if err != nil {
-    log.Println(err)
+    log.Println("Error while getting products while trying to send to merchant",  err)
   }
   if len(products) > 0 {
     lastProductId := products[len(products) - 1].ID
@@ -274,22 +282,57 @@ func (a *App) callProductsApi() error {
   return nil
 }
 
+func logErrMap(errMap map[string]ErrLog) {
+  for key, value := range errMap {
+    if value.resp != nil {
+      log.Printf("[%d]%s: %s, response_status{ %d }\n", value.count, key, value.err, value.resp.StatusCode)
+    } else {
+      log.Printf("[%d]%s: %s, response<nil>\n", value.count, key, value.err)
+    }
+  }
+}
+
 func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
   err := a.callProductsApi()
   if err != nil {
     respondWithError(w, http.StatusInternalServerError, "Internal server error")
     return
   }
-  numOfRandProductsToCreate := 2 
-  var wg sync.WaitGroup
-  // wg.Add(numOfRandProductsToCreate)
   var mu sync.Mutex
-  createdProductCount := 0
-  for i := 0; i < numOfRandProductsToCreate; i++ {
-    _createRandomProducts(a.DB, &createdProductCount, &wg, &mu)
+  var wg sync.WaitGroup
+  numOfRandProductsToCreate, err := strconv.Atoi(os.Getenv("PRODUCT_CREATE_COUNT"))
+  if err != nil {
+    log.Println("Error while retrieving PRODUCT_CREATE_COUNT. Using fallback 4")
+    numOfRandProductsToCreate = 4
   }
-  // wg.Wait()
-  // ch := make(chan bool)
+  wg.Add(numOfRandProductsToCreate)
+  productCountChannel := make(chan int, numOfRandProductsToCreate)
+  productErrChannel := make(chan ErrLog, numOfRandProductsToCreate)
+  createdProductCount := 0
+  errMap := make(map[string]ErrLog)
+
+  for i := 0; i < numOfRandProductsToCreate; i++ {
+    go _createRandomProducts(a.DB, &createdProductCount, &wg, &mu, productCountChannel, productErrChannel)
+  }
+  
+  go func() {
+    wg.Wait()
+    close(productCountChannel)
+    close(productErrChannel)
+    for _ = range productCountChannel {
+      createdProductCount++
+    }
+    for errLog := range productErrChannel { 
+      if value, exists := errMap[errLog.message]; exists {
+        errLog.count = value.count + 1
+      } else {
+        errLog.count = 1
+      }
+      errMap[errLog.message] = errLog
+    }
+    logErrMap(errMap)
+    log.Println(createdProductCount, "/", numOfRandProductsToCreate, " products successfully created")
+  }()
   // go func() {
   //   {
   //     <-ch
@@ -301,41 +344,88 @@ func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
   respondWithJSON(w, http.StatusOK, map[string]string{"result": "started random products creation"})
 }
 
-func _createRandomProducts(db *sql.DB, cpc *int, wg *sync.WaitGroup, mu *sync.Mutex) {
-  // defer wg.Done()
+func _createRandomProducts(db *sql.DB, cpc *int, wg *sync.WaitGroup, mu *sync.Mutex, ch chan int, errCh chan ErrLog) {
+  defer wg.Done()
+  // rand := rand.Intn(4)
+  // if rand < 2 {
+  //   errLog := ErrLog{
+  //     message: "[API CALL] Error while calling random-product-info:",
+  //     err: fmt.Errorf("NewError"),
+  //     resp: nil,
+  //   }
+  //   errCh <- errLog
+  //   return
+  // }
+
   randomProductServiceHost := fmt.Sprintf("%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_HOST"))
   randomProductServicePort := fmt.Sprintf("%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_PORT"))
   var product = &product{}
   response, err := http.Get(fmt.Sprintf("http://%s:%s/random-product/info", randomProductServiceHost, randomProductServicePort))
   if err != nil {
-    log.Println("Error occurred while calling random-product-info: ", err)
+    errLog := ErrLog{
+      message: "[API CALL] Error while calling random-product-info:",
+      err: err,
+    }
+    errCh <- errLog
+    // log.Println("Error occurred while calling random-product-info: ", err)
     return
   }
-  if response.Status != "200" {
+  if response.Status > "399" {
+    errLog := ErrLog{
+      message: "[API STATUS] Error status code response from random-product-info",
+      resp: response,
+    }
+    errCh <- errLog
     response, err = http.Get(fmt.Sprintf("http://%s:%s/random-product/info", randomProductServiceHost, randomProductServicePort))
     if err != nil {
-      log.Println("Error while calling random-product: ", err)
-      log.Println("Here is the response", response)
+      // log.Println("[RETRY] Error while calling random-product-info: ", err)
+      errLog := ErrLog{
+        message: "[API CALL RETRY] Error while calling random-product-info:",
+        err: err,
+        resp: response,
+      }
+      errCh <- errLog
+      return
+    }
+    if response.Status > "399" {
+      errLog := ErrLog{
+        message: "[API RETRY STATUS] Error status code response from random-product-info",
+        resp: response,
+      }
+      errCh <- errLog
       return
     }
   }
   err = json.NewDecoder(response.Body).Decode(&product)
 
   if err != nil {
-    log.Println("Error while reading response body:", err)
-    log.Println("Here is the response", response)
+    // log.Println("Error while reading response body:", err)
+    // log.Println("Here is the response", response)
+    errLog := ErrLog{
+      message: "[JSON DECODING] Error while reading response body:",
+      err: err,
+      resp: response,
+    }
+    errCh <- errLog
     return
   }
 
   _, err = product.createProduct(db)
   if err != nil {
-    log.Println("Error while creating random product:", err)
+    // log.Println("Error while creating random product:", err)
+    errLog := ErrLog{
+      message: "[DB CREATING] Error while creating random product:",
+      err: err,
+    }
+    errCh <- errLog
+    return
   }
+  ch <- 1
 
   // mu.Lock()
   // *cpc += 1
   // mu.Unlock()
-  
+
   // log.Println("Created random product:", product)
 }
 
