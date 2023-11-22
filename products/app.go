@@ -286,7 +286,7 @@ func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
   var mu sync.Mutex
   createdProductCount := 0
   for i := 0; i < numOfRandProductsToCreate; i++ {
-    go _createRandomProducts(a.DB, &createdProductCount, &wg, &mu)
+    _createRandomProducts(a.DB, &createdProductCount, &wg, &mu)
   }
   // wg.Wait()
   // ch := make(chan bool)

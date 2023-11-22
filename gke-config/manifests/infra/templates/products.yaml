@@ -84,7 +84,7 @@ spec:
         #       value: "8012"
         #     - name: SERVER_PORT
         #       value: "8010"
-        - image: mohammedrashad/products:12
+        - image: mohammedrashad/products:13
           name: image-products
           ports:
             - containerPort: 8010
