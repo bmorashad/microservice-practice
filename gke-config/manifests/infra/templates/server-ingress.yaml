@@ -9,10 +9,12 @@ metadata:
   {{ if eq .Values.mesh.name "istio" }}
     kubernetes.io/ingress.class: istio
   {{ end }}
+  {{ if .Values.mesh.ingressMeshed }}
   {{ if eq .Values.mesh.name "linkerd" }}
     linkerd.io/inject: ingress
     # ingress.kubernetes.io/custom-request-headers: "l5d-dst-override: products.linkerd-benchmark.svc.cluster.local:80"
   {{ end }}
+  {{end}}
 
 spec:
   rules:

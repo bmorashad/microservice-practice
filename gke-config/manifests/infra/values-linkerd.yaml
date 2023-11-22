@@ -2,6 +2,6 @@ mesh:
   name: linkerd
   namespace: linkerd-benchmark
   appFamily: linkerd-meshed-big
-  ingressEnabled: false
+  # ingressEnabled: false
 linkerd:
   enabled: true

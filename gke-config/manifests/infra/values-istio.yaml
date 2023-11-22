@@ -2,7 +2,7 @@ mesh:
   name: istio
   namespace: istio-benchmark
   appFamily: istio-meshed-big
-  ingressEnabled: false
+  # ingressEnabled: false
 istio:
   enabled: true
 
