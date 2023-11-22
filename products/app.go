@@ -280,7 +280,7 @@ func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
     respondWithError(w, http.StatusInternalServerError, "Internal server error")
     return
   }
-  numOfRandProductsToCreate := 10
+  numOfRandProductsToCreate := 2 
   var wg sync.WaitGroup
   // wg.Add(numOfRandProductsToCreate)
   var mu sync.Mutex

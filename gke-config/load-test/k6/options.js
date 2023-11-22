@@ -4,23 +4,24 @@ export const k6SMLoadOptions = {
     // shared_iter_scenario: {
     //   executor: "shared-iterations",
     //   vus: 10,
-    //   iterations: 1000,
+    //   iterations: 100,
     //   // startTime: "0s",
     //   gracefulStop: '5s',
     // },
-    per_vu_scenario: {
-      executor: "per-vu-iterations",
-      vus: 20,
-      iterations: 100,
-      // startTime: "10s",
-      gracefulStop: '2s'
-    },
-    // constant_vus: {
-    //   executor: 'constant-vus',
-    //   vus: 20,
-    //   duration: '30s',
+    // per_vu_scenario: {
+    //   executor: "per-vu-iterations",
+    //   vus: 10,
+    //   iterations: 100,
+    //   // duration: '30s',
+    //   // startTime: "10s",
     //   gracefulStop: '2s'
     // },
+    constant_vus: {
+      executor: 'constant-vus',
+      vus: 50,
+      duration: '60s',
+      gracefulStop: '2s'
+    },
     // ramping_vus: {
     //   executor: "ramping-vus",
     //   startvus: 0,
