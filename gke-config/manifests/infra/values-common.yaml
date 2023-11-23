@@ -1,3 +1,8 @@
 mesh:
   ingressEnabled: true
   ingressMeshed: false
+services:
+  products:
+    productCreateCount: "4"
+    enableConcurrentProductCreation: "false"
+    enableConcurrentProductCreationLog: "false"

@@ -6,6 +6,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math/rand"
+	"strings"
+
 	// "math/rand"
 	"os"
 	"sync"
@@ -315,14 +318,27 @@ func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
     go _createRandomProducts(a.DB, &createdProductCount, &wg, &mu, productCountChannel, productErrChannel)
   }
   
-  go func() {
+  concurrentProductCreationEnabled := strings.ToLower(os.Getenv("ENABLE_CONCURRENT_PRODUCT_CREATION")) == "true"
+  if concurrentProductCreationEnabled {
+    go _handleProductRandomCreation(&wg, &createdProductCount, errMap, productCountChannel, productErrChannel, numOfRandProductsToCreate)
+    respondWithJSON(w, http.StatusOK, map[string]string{"result": "started random products creation"})
+    return
+  } 
+  _handleProductRandomCreation(&wg, &createdProductCount, errMap, productCountChannel, productErrChannel, numOfRandProductsToCreate)
+  respondWithJSON(w, http.StatusOK, map[string]string{
+    "createdProductCount": strconv.Itoa(createdProductCount),
+    "failedProducts": strconv.Itoa(numOfRandProductsToCreate - createdProductCount),
+  })
+}
+
+func _handleProductRandomCreation(wg *sync.WaitGroup, productCount *int, errMap map[string]ErrLog, countChannel chan int, errChannel chan ErrLog, numOfRandProductsToCreate int) {
     wg.Wait()
-    close(productCountChannel)
-    close(productErrChannel)
-    for _ = range productCountChannel {
-      createdProductCount++
+    close(countChannel)
+    close(errChannel)
+    for _ = range countChannel {
+      *productCount += 1 
     }
-    for errLog := range productErrChannel { 
+    for errLog := range errChannel { 
       if value, exists := errMap[errLog.message]; exists {
         errLog.count = value.count + 1
       } else {
@@ -331,29 +347,30 @@ func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
       errMap[errLog.message] = errLog
     }
     logErrMap(errMap)
-    log.Println(createdProductCount, "/", numOfRandProductsToCreate, " products successfully created")
-  }()
-  // go func() {
-  //   {
-  //     <-ch
-  //     log.Println("Successfully created product count:", createdProductCount)
-  //     createdProductCount = 0
-  //     close(ch)
-  //   }
-  // }()
-  respondWithJSON(w, http.StatusOK, map[string]string{"result": "started random products creation"})
+    productCreationLogEnabled := strings.ToLower(os.Getenv("ENABLE_CONCURRENT_PRODUCT_CREATION_LOG")) == "true"
+    if productCreationLogEnabled {
+      log.Println(*productCount, "/", numOfRandProductsToCreate, " products successfully created")
+    }
+}
+
+func _randomlyFailCreatingProduct() *ErrLog {
+  rand := rand.Intn(4)
+  if rand < 2 {
+    errLog := ErrLog{
+      message: "[RANDOM FAIL] Error while calling random-product-info:",
+      err: fmt.Errorf("NewError"),
+      resp: nil,
+    }
+    return &errLog
+  }
+  return nil
 }
 
 func _createRandomProducts(db *sql.DB, cpc *int, wg *sync.WaitGroup, mu *sync.Mutex, ch chan int, errCh chan ErrLog) {
   defer wg.Done()
-  // rand := rand.Intn(4)
-  // if rand < 2 {
-  //   errLog := ErrLog{
-  //     message: "[API CALL] Error while calling random-product-info:",
-  //     err: fmt.Errorf("NewError"),
-  //     resp: nil,
-  //   }
-  //   errCh <- errLog
+  // errLog := _randomlyFailCreatingProduct()
+  // if errLog != nil {
+  //   errCh <- *errLog
   //   return
   // }
 

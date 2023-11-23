@@ -18,6 +18,11 @@ data:
   MERCHANT_SERVICE_PORT: "5010"
   PRICE_SERVICE_HOST: price-gen
   PRICE_SERVICE_PORT: "6010"
+  # PRODUCT_CREATE_COUNT: {{.Values.services.products.productCreateCount}}
+  # ENABLE_CONCURRENT_PRODUCT_CREATION: {{.Values.services.products.enableConcurrentProductCreation}}
+  # ENABLE_CONCURRENT_PRODUCT_CREATION_LOG: {{.Values.services.products.enableConcurrentProductCreationLog}}
   PRODUCT_CREATE_COUNT: "4"
+  ENABLE_CONCURRENT_PRODUCT_CREATION: "false"
+  ENABLE_CONCURRENT_PRODUCT_CREATION_LOG: "false"
 ---
 

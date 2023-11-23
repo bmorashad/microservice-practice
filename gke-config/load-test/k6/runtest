@@ -1,0 +1,12 @@
+#/bin/bash
+
+if [ "$1" = "linkerd" ]; then
+  ing=$(kubectl get ing -A | tail -n +2 | rg "linkerd" | awk '{print $5}')
+  mesh=$(kubectl get ing -A | tail -n +2 | rg "linkerd" | awk '{print $1}' | rg ".*" -r "linkerd")
+  k6 run multi-test.js --address localhost:6566 -e HOST=$ing -e MESH=$mesh
+else
+  ing=$(kubectl get ing -A | tail -n +2 | rg "istio" | awk '{print $5}')
+  mesh=$(kubectl get ing -A | tail -n +2 | rg "istio" | awk '{print $1}' | rg ".*" -r "istio")
+  k6 run multi-test.js --address localhost:6565 -e HOST=$ing -e MESH=$mesh
+fi
+
