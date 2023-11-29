@@ -4,7 +4,11 @@
 kubectl exec -n linkerd-benchmark -it db-0 -c db -- mysql -uroot -proot -e "truncate table products; truncate table merchantproducts;" ecommerce;
 kubectl exec -n istio-benchmark -it db-0 -- mysql -uroot -proot -e "truncate table products; truncate table merchantproducts;" ecommerce;
 
-http "http://34.126.89.43:8010/reset"
-http "http://35.240.180.78:8010/reset"
+linkerd=$(kubectl get ing -A | tail -n +2 | rg "linkerd" | awk '{print $5}')
+istio=$(kubectl get ing -A | tail -n +2 | rg "istio" | awk '{print $5}')
+
+
+http "http://$linkerd/reset"
+http "http://$istio/reset"
 
 ./selectproducts.sh
