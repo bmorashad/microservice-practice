@@ -67,6 +67,17 @@ spec:
         sidecar.istio.io/proxyMemory: 2Gi
       {{end}}
     spec:
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #         - matchExepressions:
+      #           - key: topology.kubernetes.io/zone
+      #             operator: In
+      #             values:
+      #             - asia-southeast1-a
+      nodeSelector:
+        topology.kubernetes.io/zone: asia-southeast1-a
       containers:
         # - env:
         #     - name: DB_NAME
