@@ -44,13 +44,13 @@ spec:
         config.linkerd.io/proxy-cpu-limit: 1250m
         config.linkerd.io/proxy-cpu-request: 700m
         config.linkerd.io/proxy-memory-limit: 1Gi
-        config.linkerd.io/proxy-memory-request: 500Mi
+        config.linkerd.io/proxy-memory-request: 800Mi
       {{end}}
       {{if eq .Values.mesh.namespace "istio-benchmark"}}
         sidecar.istio.io/proxyCPULimit: 1250m
         sidecar.istio.io/proxyCPU: 700m
         sidecar.istio.io/proxyMemoryLimit: 1Gi
-        sidecar.istio.io/proxyMemory: 500Mi
+        sidecar.istio.io/proxyMemory: 800Mi
       {{end}}
     spec:
       terminationGracePeriodSeconds: 10
