@@ -2,12 +2,14 @@
 
 now=$(date +'%d-%m-%y-%H:%M')
 if [ "$1" = "linkerd" ]; then
+  port=6565
   meshName="linkerd"
 else
+  port=6566
   meshName="istio"
 fi
 
 ing=$(kubectl get ing -A | tail -n +2 | rg "$meshName" | awk '{print $5}')
 mesh=$(kubectl get ing -A | tail -n +2 | rg "$meshName" | awk '{print $1}' | rg ".*" -r "$meshName")
 resultFileName="$mesh-results/$mesh-results--epoch:$now.json"
-k6 run load_test.js --address localhost:6565 -e HOST=$ing -e MESH=$mesh --out json=$resultFileName
+k6 run load_test.js --address localhost:$port -e HOST=$ing -e MESH=$mesh --out json=$resultFileName

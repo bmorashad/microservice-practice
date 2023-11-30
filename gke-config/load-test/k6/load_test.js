@@ -15,7 +15,7 @@ const k6Options = {
     //   preAllocatedVUs: 1, // how large the initial pool of VUs would be
     //   startTime: "0s",
     // },
-    constant_request_rate: {
+    constant_request_rate_250: {
       // linkerd wins without error
       executor: "constant-arrival-rate",
       rate: 250,
@@ -26,7 +26,7 @@ const k6Options = {
       maxVUs: 200, // if the preAllocatedVUs are not enough, we can initialize more
       startTime: "0s",
     },
-    constant_request_rate: {
+    constant_request_rate_230: {
       // linkerd wins without error
       executor: "constant-arrival-rate",
       rate: 230,
@@ -50,36 +50,36 @@ const k6Options = {
       gracefulRampDown: "1s",
       startTime: "1.2m",
     },
-    ramping_vus: {
-      executor: "ramping-vus",
-      startvus: 25,
-      stages: [
-        // { duration: "30s", target: 250 }, // test again
-        // { duration: "30s", target: 350 }, // linkerd wins no failiure
-        // { duration: "30s", target: 300 }, // linkerd wins no failiure
-        { duration: "30s", target: 280 }, // linkerd overall slightly faster, looses in p95
-        { duration: "20s", target: 100 },
-        { duration: "10s", target: 50 },
-        { duration: "5s", target: 0 },
-      ],
-      gracefulRampDown: "1s",
-      startTime: "2m",
-    },
-    ramping_arrival_rate: {
-      //Not Working Properly
-      executor: "ramping-arrival-rate",
-      startRate: 100,
-      timeUnit: "1m",
-      preAllocatedVUs: 25,
-      stages: [
-        { target: 100, duration: "1m" },
-        { target: 150, duration: "1.5m" },
-        { target: 250, duration: "1.5m" },
-        { target: 10, duration: "1m" },
-        { target: 0, duration: "5s" },
-      ],
-      startTime: "3.5m",
-    },
+    // ramping_vus: {
+    //   executor: "ramping-vus",
+    //   startvus: 25,
+    //   stages: [
+    //     // { duration: "30s", target: 250 }, // test again
+    //     // { duration: "30s", target: 350 }, // linkerd wins no failiure
+    //     // { duration: "30s", target: 300 }, // linkerd wins no failiure
+    //     { duration: "30s", target: 280 }, // linkerd overall slightly faster, looses in p95
+    //     { duration: "20s", target: 100 },
+    //     { duration: "10s", target: 50 },
+    //     { duration: "5s", target: 0 },
+    //   ],
+    //   gracefulRampDown: "1s",
+    //   startTime: "2m",
+    // },
+    // ramping_arrival_rate: {
+    //   //Not Working Properly
+    //   executor: "ramping-arrival-rate",
+    //   startRate: 100,
+    //   timeUnit: "1m",
+    //   preAllocatedVUs: 25,
+    //   stages: [
+    //     { target: 50, duration: "1m" },
+    //     { target: 100, duration: "1.5m" },
+    //     { target: 150, duration: "1.5m" },
+    //     { target: 10, duration: "1m" },
+    //     { target: 0, duration: "5s" },
+    //   ],
+    //   startTime: "2m",
+    // },
   },
 };
 
