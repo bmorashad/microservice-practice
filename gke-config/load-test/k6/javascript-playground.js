@@ -1,11 +1,9 @@
 // import { options } from './options.js'
+
 let options = {
   // discardResponseBodies: true,
   scenarios: {
-    // shared_iter_scenario: {
-    //   executor: "shared-iterations",
-    //   vus: 10,
-    //   iterations: 100,
+    // shared_iter_scenario: { executor: "shared-iterations", vus: 10, iterations: 100,
     //   // startTime: "0s",
     //   gracefulStop: '5s',
     // },
@@ -15,13 +13,13 @@ let options = {
       iterations: 3000,
       // duration: '30s',
       // startTime: "10s",
-      gracefulStop: '2s'
+      gracefulStop: "2s",
     },
     constant_vus: {
-      executor: 'constant-vus',
+      executor: "constant-vus",
       vus: 50,
-      duration: '60s',
-      gracefulStop: '2s'
+      duration: "60s",
+      gracefulStop: "2s",
     },
     // ramping_vus: {
     //   executor: "ramping-vus",
@@ -59,33 +57,33 @@ let options = {
   },
 };
 
-let opts = {...options}
+let opts = { ...options };
 
-var summaryFileName = ""
+var summaryFileName = "";
 for (let key in options.scenarios) {
-  summaryFileName += key + "-"
+  summaryFileName += key + "-";
 }
-const now = Date.now()
+const now = Date.now();
 // console.log(summaryFileName.substring(0, summaryFileName.length - 1) + `_summary--${now}.json`)
-console.log(`istio-summary--epoch:${now}.json`)
-options.scenarios.new_one = {string: "Hello"}
-console.log(JSON.stringify(options.scenarios))
+console.log(`istio-summary--epoch:${now}.json`);
+options.scenarios.new_one = { string: "Hello" };
+console.log(JSON.stringify(options.scenarios));
 
 function handleSummary(data) {
-  const now = Date.now()
-  const fileName = `istio-multi-test-results--epoch:${now}.json`
-  const fileNameJson = `${fileName}.json`
-  const fileNameHtml = `${fileName}.html`
-  const fileNameSummary = `istio-multi-test-summary--epoch:${now}.txt`
-  data.testOpts = options.scenarios
-  summaryHandlerOpts = {}
-  summaryHandlerOpts[fileNameJson] = "hello"
-  summaryHandlerOpts[fileNameHtml]= "html"
-  summaryHandlerOpts[fileNameSummary]= "tick"
-  summaryHandlerOpts['stdout']= "tap"
-  console.log(data.testOpts)
-  return summaryHandlerOpts
+  const now = Date.now();
+  const fileName = `istio-multi-test-results--epoch:${now}.json`;
+  const fileNameJson = `${fileName}.json`;
+  const fileNameHtml = `${fileName}.html`;
+  const fileNameSummary = `istio-multi-test-summary--epoch:${now}.txt`;
+  data.testOpts = options.scenarios;
+  summaryHandlerOpts = {};
+  summaryHandlerOpts[fileNameJson] = "hello";
+  summaryHandlerOpts[fileNameHtml] = "html";
+  summaryHandlerOpts[fileNameSummary] = "tick";
+  summaryHandlerOpts["stdout"] = "tap";
+  console.log(data.testOpts);
+  return summaryHandlerOpts;
 }
 
-summary = handleSummary(opts)
+summary = handleSummary(opts);
 // console.log(summary)
