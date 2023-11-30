@@ -5,14 +5,13 @@ import { sleep } from "k6";
 import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
 import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
 
-export const options = {
+const k6Options = {
   scenarios: {
     constant_request_rate: { // linkerd wins without error
       executor: "constant-arrival-rate",
       rate: 250,
       timeUnit: "1s", // 1000 iterations per second, i.e. 1000 RPS
-      // duration: "30s",
-      duration: "5s",
+      duration: "30s",
       // preAllocatedVUs: 100, // how large the initial pool of VUs would be
       preAllocatedVUs: 50, // how large the initial pool of VUs would be
       maxVUs: 200, // if the preAllocatedVUs are not enough, we can initialize more
@@ -72,6 +71,11 @@ export const options = {
   },
 };
 
+let opts = {}
+
+export const options = Object.assign(opts, k6Options)
+
+
 var baseUrl = `http://${__ENV.HOST}`;
 var mesh = `${__ENV.MESH}` || `${__ENV.HOST}`;
 
@@ -107,15 +111,15 @@ function getNowDate() {
 
 export function handleSummary(data) {
   const now = getNowDate()
-  const fileName = `${mesh}-results/${mesh}-multi-test-results--epoch:${now}`
+  const fileName = `${mesh}-results/${mesh}-summary--epoch:${now}`
   const fileNameJson = `${fileName}.json`
   const fileNameHtml = `${fileName}.html`
-  const fileNameSummary = `${mesh}-results/${mesh}-multi-test-summary--epoch:${now}.txt`
-  data.testOpts = options.scenarios
+  const fileNameTxt = `${fileName}.txt`
+  data['testScenarios'] = k6Options.scenarios
   const summaryHandlerOpts = {}
   summaryHandlerOpts[fileNameJson] = JSON.stringify(data)
   summaryHandlerOpts[fileNameHtml] = htmlReport(data)
-  summaryHandlerOpts[fileNameSummary]= textSummary(data, {enableColors: true})
+  summaryHandlerOpts[fileNameTxt]= textSummary(data, {enableColors: true})
   summaryHandlerOpts['stdout']= textSummary(data, { indent: '→', enableColors: true })
 
   return summaryHandlerOpts

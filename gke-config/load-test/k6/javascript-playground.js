@@ -59,6 +59,8 @@ let options = {
   },
 };
 
+let opts = {...options}
+
 var summaryFileName = ""
 for (let key in options.scenarios) {
   summaryFileName += key + "-"
@@ -81,8 +83,9 @@ function handleSummary(data) {
   summaryHandlerOpts[fileNameHtml]= "html"
   summaryHandlerOpts[fileNameSummary]= "tick"
   summaryHandlerOpts['stdout']= "tap"
+  console.log(data.testOpts)
   return summaryHandlerOpts
 }
 
-summary = handleSummary(options)
-console.log(summary)
+summary = handleSummary(opts)
+// console.log(summary)
