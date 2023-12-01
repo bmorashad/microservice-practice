@@ -18,9 +18,9 @@ const k6Options = {
     constant_request_rate_250: {
       // linkerd wins without error
       executor: "constant-arrival-rate",
-      rate: 250,
+      rate: 150,
       timeUnit: "1s", // 1000 iterations per second, i.e. 1000 RPS
-      duration: "30s",
+      duration: "3m",
       // preAllocatedVUs: 100, // how large the initial pool of VUs would be
       preAllocatedVUs: 50, // how large the initial pool of VUs would be
       maxVUs: 200, // if the preAllocatedVUs are not enough, we can initialize more
@@ -29,26 +29,26 @@ const k6Options = {
     constant_request_rate_230: {
       // linkerd wins without error
       executor: "constant-arrival-rate",
-      rate: 230,
+      rate: 100,
       timeUnit: "1s", // 1000 iterations per second, i.e. 1000 RPS
-      duration: "30s",
+      duration: "2m",
       // preAllocatedVUs: 100, // how large the initial pool of VUs would be
       preAllocatedVUs: 50, // how large the initial pool of VUs would be
       maxVUs: 150, // if the preAllocatedVUs are not enough, we can initialize more
-      startTime: "33s",
+      startTime: "3.2m",
     },
     ramping_vus: {
       // istio wins by small margin
       executor: "ramping-vus",
-      startvus: 15,
+      startvus: 50,
       stages: [
-        { duration: "30s", target: 150 },
-        { duration: "10s", target: 100 },
-        { duration: "10s", target: 50 },
-        { duration: "5s", target: 0 },
+        { duration: "1m", target: 150 },
+        { duration: "1m", target: 100 },
+        { duration: "1m", target: 50 },
+        { duration: "30s", target: 0 },
       ],
       gracefulRampDown: "1s",
-      startTime: "1.2m",
+      startTime: "5.2m",
     },
     // ramping_vus: {
     //   executor: "ramping-vus",

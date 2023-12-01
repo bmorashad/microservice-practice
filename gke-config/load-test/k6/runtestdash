@@ -13,4 +13,4 @@ fi
 ing=$(kubectl get ing -A | tail -n +2 | rg "$meshName" | awk '{print $5}')
 mesh=$(kubectl get ing -A | tail -n +2 | rg "$meshName" | awk '{print $1}' | rg ".*" -r "$meshName")
 resultDashboardFileName="$mesh-results/dashboard/$mesh-results--epoch:$now.html"
-echo ./k6 run load_test.js --address localhost:$port -e HOST=$ing -e MESH=$mesh --out dashboard=report=$resultDashboardFileName\&port=$dashboardPort
+./k6 run load_test.js --address localhost:$port -e HOST=$ing -e MESH=$mesh --out dashboard=report=$resultDashboardFileName\&port=$dashboardPort
