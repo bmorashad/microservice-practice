@@ -15,6 +15,50 @@ const k6Options = {
     //   preAllocatedVUs: 1, // how large the initial pool of VUs would be
     //   startTime: "0s",
     // },
+    constant_request_rate_10_100: {
+      // linkerd wins without error
+      executor: "constant-arrival-rate",
+      rate: 100,
+      timeUnit: "1s", // 1000 iterations per second, i.e. 1000 RPS
+      duration: "1m",
+      // preAllocatedVUs: 100, // how large the initial pool of VUs would be
+      preAllocatedVUs: 10, // how large the initial pool of VUs would be
+      maxVUs: 64, // if the preAllocatedVUs are not enough, we can initialize more
+      startTime: "0s",
+    },
+    constant_request_rate_50_100: {
+      // linkerd wins without error
+      executor: "constant-arrival-rate",
+      rate: 100,
+      timeUnit: "1s", // 1000 iterations per second, i.e. 1000 RPS
+      duration: "1m",
+      // preAllocatedVUs: 100, // how large the initial pool of VUs would be
+      preAllocatedVUs: 50, // how large the initial pool of VUs would be
+      maxVUs: 64, // if the preAllocatedVUs are not enough, we can initialize more
+      startTime: "62s",
+    },
+    constant_request_rate_50_150: {
+      // linkerd wins without error
+      executor: "constant-arrival-rate",
+      rate: 100,
+      timeUnit: "1s", // 1000 iterations per second, i.e. 1000 RPS
+      duration: "1m",
+      // preAllocatedVUs: 100, // how large the initial pool of VUs would be
+      preAllocatedVUs: 50, // how large the initial pool of VUs would be
+      maxVUs: 150, // if the preAllocatedVUs are not enough, we can initialize more
+      startTime: "124s",
+    },
+    constant_request_rate_50_200: {
+      // linkerd wins without error
+      executor: "constant-arrival-rate",
+      rate: 150,
+      timeUnit: "1s", // 1000 iterations per second, i.e. 1000 RPS
+      duration: "1m",
+      // preAllocatedVUs: 100, // how large the initial pool of VUs would be
+      preAllocatedVUs: 50, // how large the initial pool of VUs would be
+      maxVUs: 200, // if the preAllocatedVUs are not enough, we can initialize more
+      startTime: "186s",
+    },
     constant_request_rate_250: {
       // linkerd wins without error
       executor: "constant-arrival-rate",
@@ -24,7 +68,7 @@ const k6Options = {
       // preAllocatedVUs: 100, // how large the initial pool of VUs would be
       preAllocatedVUs: 50, // how large the initial pool of VUs would be
       maxVUs: 200, // if the preAllocatedVUs are not enough, we can initialize more
-      startTime: "0s",
+      startTime: "247s",
     },
     constant_request_rate_230: {
       // linkerd wins without error
@@ -35,7 +79,7 @@ const k6Options = {
       // preAllocatedVUs: 100, // how large the initial pool of VUs would be
       preAllocatedVUs: 50, // how large the initial pool of VUs would be
       maxVUs: 150, // if the preAllocatedVUs are not enough, we can initialize more
-      startTime: "3.2m",
+      startTime: "430s",
     },
     ramping_vus: {
       // istio wins by small margin
@@ -48,7 +92,7 @@ const k6Options = {
         { duration: "30s", target: 0 },
       ],
       gracefulRampDown: "1s",
-      startTime: "5.2m",
+      startTime: "551s",
     },
     // ramping_vus: {
     //   executor: "ramping-vus",

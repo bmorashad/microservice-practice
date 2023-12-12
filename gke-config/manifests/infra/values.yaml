@@ -1,5 +1,6 @@
 mesh:
   name: no-mesh
   namespace: no-mesh-benchmark
-  appFamily: baseline
-  # ingressEnabled: false
+  # appFamily: baseline
+  appFamily: no-meshed-big
+  ingressEnabled: true

@@ -1,0 +1,41 @@
+@import "../variables";
+
+.ant-tabs.ant-tabs-card .ant-tabs-card-bar .ant-tabs-tab-active {
+  height: 40px;
+  color: $primary-color;
+  background: #fff;
+  border-color: #e8e8e8;
+  border-bottom: 1px solid #fff;
+}
+
+.ant-tabs-tab {
+  color: $dark-color-3;
+}
+.ant-tabs.ant-tabs-card .ant-tabs-card-bar .ant-tabs-tab-disabled {
+  color: $primary-color;
+}
+
+.ant-tabs-extra-content .ant-tabs-new-tab:hover {
+  color: $primary-color;
+  border-color: $primary-color;
+}
+
+.ant-tabs .ant-tabs-card-bar.ant-tabs-bottom-bar .ant-tabs-tab-active {
+  color: $primary-color;
+}
+
+.ant-tabs-ink-bar {
+  background-color: $primary-color;
+}
+
+.ant-tabs-nav .ant-tabs-tab:hover {
+  color: $primary-color;
+}
+.ant-tabs-nav .ant-tabs-tab:active {
+  color: $primary-color;
+}
+
+.ant-tabs-nav .ant-tabs-tab-active {
+  color: $primary-color;
+  font-weight: 500;
+}

@@ -1,0 +1,21 @@
+     █ setup
+
+     █ teardown
+
+     data_received[2m..................:[0m [36m34 MB[0m  [36;2m44 kB/s[0m
+     data_sent[2m......................:[0m [36m8.5 MB[0m [36;2m11 kB/s[0m
+     dropped_iterations[2m.............:[0m [36m29665[0m  [36;2m38.899087/s[0m
+     http_req_blocked[2m...............:[0m avg=[36m301.99µs[0m min=[36m938ns[0m    med=[36m7.78µs[0m  max=[36m101.69ms[0m p(90)=[36m9.95µs[0m   p(95)=[36m12.15µs[0m 
+     http_req_connecting[2m............:[0m avg=[36m293.39µs[0m min=[36m0s[0m       med=[36m0s[0m      max=[36m101.56ms[0m p(90)=[36m0s[0m       p(95)=[36m0s[0m      
+     http_req_duration[2m..............:[0m avg=[36m124.9ms[0m  min=[36m40.93ms[0m  med=[36m95.11ms[0m max=[36m2.06s[0m    p(90)=[36m167.73ms[0m p(95)=[36m264.4ms[0m 
+       { expected_response:true }[2m...:[0m avg=[36m123.76ms[0m min=[36m40.93ms[0m  med=[36m94.95ms[0m max=[36m2.06s[0m    p(90)=[36m163.29ms[0m p(95)=[36m250.55ms[0m
+     http_req_failed[2m................:[0m [36m0.58%[0m  [36;2m✓ 527[0m        [36;2m✗ 89409[0m
+     http_req_receiving[2m.............:[0m avg=[36m87.36µs[0m  min=[36m6.49µs[0m   med=[36m84.88µs[0m max=[36m1.64ms[0m   p(90)=[36m119.71µs[0m p(95)=[36m141.9µs[0m 
+     http_req_sending[2m...............:[0m avg=[36m34.08µs[0m  min=[36m3.17µs[0m   med=[36m33.06µs[0m max=[36m1.35ms[0m   p(90)=[36m44.19µs[0m  p(95)=[36m52.19µs[0m 
+     http_req_tls_handshaking[2m.......:[0m avg=[36m0s[0m       min=[36m0s[0m       med=[36m0s[0m      max=[36m0s[0m       p(90)=[36m0s[0m       p(95)=[36m0s[0m      
+     http_req_waiting[2m...............:[0m avg=[36m124.78ms[0m min=[36m40.77ms[0m  med=[36m94.98ms[0m max=[36m2.06s[0m    p(90)=[36m167.63ms[0m p(95)=[36m264.26ms[0m
+     http_reqs[2m......................:[0m [36m89936[0m  [36;2m117.931176/s[0m
+     iteration_duration[2m.............:[0m avg=[36m2.25s[0m    min=[36m186.21ms[0m med=[36m2.24s[0m   max=[36m5.77s[0m    p(90)=[36m3.39s[0m    p(95)=[36m3.66s[0m   
+     iterations[2m.....................:[0m [36m44905[0m  [36;2m58.882977/s[0m
+     vus[2m............................:[0m [36m1[0m      [36;2mmin=1[0m        [36;2mmax=200[0m
+     vus_max[2m........................:[0m [36m400[0m    [36;2mmin=180[0m      [36;2mmax=400[0m

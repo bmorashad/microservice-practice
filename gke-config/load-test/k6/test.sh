@@ -1,0 +1,10 @@
+#!/bin/bash
+
+
+
+for ((i = 0; i < 10; i++)); do
+  ./runtestdash linkerd &
+  ./runtestdash istio &
+  wait
+  ./resetapp.sh
+done

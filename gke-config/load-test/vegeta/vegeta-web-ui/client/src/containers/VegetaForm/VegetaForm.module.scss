@@ -1,0 +1,26 @@
+@import "../../styles/variables";
+
+.Section {
+  padding: 10px;
+}
+.Form {
+  > *:not(:last-child) {
+    margin-bottom: 10px;
+  }
+}
+.NewTestTitle {
+  text-align: center;
+  font-size: 2.4rem;
+  letter-spacing: 1px;
+  color: $dark-color-1;
+}
+
+.Select {
+  width: 100%;
+  outline-color: $primary-color !important;
+}
+
+.Submit {
+  width: 100%;
+  margin-top: 20px;
+}
