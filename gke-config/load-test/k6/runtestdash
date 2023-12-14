@@ -2,15 +2,21 @@
 
 now=$(date +'%d-%m-%y-%H:%M')
 if [ "$1" = "linkerd" ]; then
-  meshName="linkerd"
-  port=5667
-  dashboardPort=5669
+	meshName="linkerd"
+	port=5667
+	dashboardPort=5669
+elif [ "$1" = "no-mesh" ]; then
+	meshName="no-mesh"
+	port=5670
+	dashboardPort=5671
 else
-  meshName="istio"
-  port=5666
-  dashboardPort=5668
+	meshName="istio"
+	port=5666
+	dashboardPort=5668
 fi
 ing=$(kubectl get ing -A | tail -n +2 | rg "$meshName" | awk '{print $5}')
 mesh=$(kubectl get ing -A | tail -n +2 | rg "$meshName" | awk '{print $1}' | rg ".*" -r "$meshName")
-resultDashboardFileName="$mesh-results/dashboard/$mesh-results--epoch:$now.html"
+resultDashboardDir="$mesh-results/dashboard"
+mkdir -p $resultDashboardDir
+resultDashboardFileName="$resultDashboardDir/$mesh-results--epoch:$now.html"
 ./k6 run load_test.js --address localhost:$port -e HOST=$ing -e MESH=$mesh --out dashboard=report=$resultDashboardFileName\&port=$dashboardPort

@@ -373,8 +373,8 @@ func _createRandomProducts(db *sql.DB, cpc *int, wg *sync.WaitGroup, mu *sync.Mu
 	//   return
 	// }
 
-	randomProductServiceHost := fmt.Sprintf("%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_HOST"))
-	randomProductServicePort := fmt.Sprintf("%s", os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_PORT"))
+	randomProductServiceHost := os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_HOST")
+	randomProductServicePort := os.Getenv("RANDOM_PRODUCT_INFO_SERVICE_PORT")
 	product := &product{}
 	response, err := http.Get(fmt.Sprintf("http://%s:%s/random-product/info", randomProductServiceHost, randomProductServicePort))
 	if err != nil {
