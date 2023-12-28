@@ -19,6 +19,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -60,7 +61,23 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	m := NewMetrics(reg)
 	m.concurrentExecutions.Set(2)
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
+
+	serviceName := "prodcuts-service"
+	serviceVersion := "1.0.0"
+	ctx := context.Background()
+	_, err = setupOTelSDK(ctx, serviceName, serviceVersion)
+	if err != nil {
+		log.Println("Error occurred while connecting to Jaeger backend: ", err.Error())
+		return
+	}
+	// defer func() {
+	// 	log.Println("Shutting down")
+	// 	err = otelShutdown(ctx)
+	// }()
+
 	a.Router = mux.NewRouter()
+	// a.Router.Use(otelmux.Middleware(serviceName))
+	a.Router.Use(otelmux.Middleware(serviceName))
 
 	a.initializeRoutes(promHandler)
 	initDB(a.DB)
@@ -213,7 +230,7 @@ func productToMerchantBatchProcess(db *sql.DB) {
 	for {
 		select {
 		case <-uptimeTicker.C:
-			sendProductsToMerchant(db)
+			// sendProductsToMerchant(db)
 		}
 	}
 }
@@ -324,9 +341,14 @@ func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_handleProductRandomCreation(&wg, &createdProductCount, errMap, productCountChannel, productErrChannel, numOfRandProductsToCreate)
-	respondWithJSON(w, http.StatusOK, map[string]string{
+	failedProductCount := numOfRandProductsToCreate - createdProductCount
+	var statusCode int
+	if failedProductCount > 0 {
+		statusCode = http.StatusExpectationFailed
+	}
+	respondWithJSON(w, statusCode, map[string]string{
 		"createdProductCount": strconv.Itoa(createdProductCount),
-		"failedProducts":      strconv.Itoa(numOfRandProductsToCreate - createdProductCount),
+		"failedProducts":      strconv.Itoa(failedProductCount),
 	})
 }
 
