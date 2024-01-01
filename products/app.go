@@ -72,7 +72,8 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	ctx := context.Background()
 	// tp = tracing.InitOtelTrace(ctx, serviceName, "products", "dev")
 	// tp.Start(ctx, "new span")
-	_ = tracing.InitOtelTrace(ctx, serviceName, "products", "dev")
+	// _ = tracing.InitOtelTrace(ctx, serviceName, "products", "dev")
+	_ = tracing.InitOtelZipkinTrace(ctx, serviceName, "products", "dev")
 	// defer shutdown(ctx)
 	// _, err = setupOTelSDK(ctx, serviceName, serviceVersion)
 	// if err != nil {
