@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"practice-server/tracing"
 	"strings"
 
 	// "math/rand"
@@ -17,12 +18,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
-
-	"github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type App struct {
@@ -37,7 +39,10 @@ type ErrLog struct {
 	count   int
 }
 
-var lastSentProductID = 0
+var (
+	lastSentProductID = 0
+	tp                trace.Tracer
+)
 
 func (a *App) Initializer(user, password, host, port, dbname string) {
 	cfg := mysql.Config{
@@ -62,14 +67,18 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	m.concurrentExecutions.Set(2)
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 
-	serviceName := "prodcuts-service"
-	serviceVersion := "1.0.0"
+	serviceName := "otel5-prodcuts-service"
+	// serviceVersion := "1.0.0"
 	ctx := context.Background()
-	_, err = setupOTelSDK(ctx, serviceName, serviceVersion)
-	if err != nil {
-		log.Println("Error occurred while connecting to Jaeger backend: ", err.Error())
-		return
-	}
+	// tp = tracing.InitOtelTrace(ctx, serviceName, "products", "dev")
+	// tp.Start(ctx, "new span")
+	_ = tracing.InitOtelTrace(ctx, serviceName, "products", "dev")
+	// defer shutdown(ctx)
+	// _, err = setupOTelSDK(ctx, serviceName, serviceVersion)
+	// if err != nil {
+	// 	log.Println("Error occurred while connecting to Jaeger backend: ", err.Error())
+	// 	return
+	// }
 	// defer func() {
 	// 	log.Println("Shutting down")
 	// 	err = otelShutdown(ctx)
@@ -79,6 +88,7 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	// a.Router.Use(otelmux.Middleware(serviceName))
 	a.Router.Use(otelmux.Middleware(serviceName))
 
+	tp = otel.Tracer("products-service-otel-trace-frist")
 	a.initializeRoutes(promHandler)
 	initDB(a.DB)
 	go productToMerchantBatchProcess(a.DB)
@@ -86,6 +96,8 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 
 func initDB(db *sql.DB) {
 	ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, span := tp.Start(ctx, "INIT DATABASE")
+	defer span.End()
 	defer cancelFunc()
 	res, err := db.ExecContext(ctx, "CREATE TABLE IF NOT EXISTS products (id int not null auto_increment, name varchar(255), price varchar(255), PRIMARY KEY (id))")
 	if err != nil {

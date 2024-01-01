@@ -53,14 +53,14 @@ func setupOTelSDK(ctx context.Context, serviceName, serviceVersion string) (shut
 		log.Fatalf(err.Error(), shutdown(ctx))
 		return
 	}
-	tp := newTracerProvider(exp, r, prop)
+	tp := newTracerProvider(exp, r)
 	otel.SetTextMapPropagator(prop)
 	otel.SetTracerProvider(tp)
 	tracer = tp.Tracer(serviceName)
 	return
 }
 
-func newTracerProvider(exp sdktrace.SpanExporter, resource *resource.Resource, prop propagation.TextMapPropagator) *sdktrace.TracerProvider {
+func newTracerProvider(exp sdktrace.SpanExporter, resource *resource.Resource) *sdktrace.TracerProvider {
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exp),
 		sdktrace.WithResource(resource),
