@@ -67,14 +67,15 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	m.concurrentExecutions.Set(2)
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 
-	serviceName := "otel5-prodcuts-service"
+	serviceName := "prodcuts-service-trace-v1"
 	// serviceVersion := "1.0.0"
 	ctx := context.Background()
-	// tp = tracing.InitOtelTrace(ctx, serviceName, "products", "dev")
-	// tp.Start(ctx, "new span")
-	// _ = tracing.InitOtelTrace(ctx, serviceName, "products", "dev")
-	_ = tracing.InitOtelZipkinTrace(ctx, serviceName, "products", "dev")
-	// defer shutdown(ctx)
+	// shutdown, err := tracing.InitZipkinOtelTrace(ctx, serviceName, "products", "dev")
+	shutdown, err := tracing.InitJaegerOtelTrace(ctx, serviceName, "products", "dev")
+	if err != nil {
+		log.Fatalf("failed to initialize stdouttrace export pipeline: %v", err)
+	}
+	defer shutdown(ctx)
 	// _, err = setupOTelSDK(ctx, serviceName, serviceVersion)
 	// if err != nil {
 	// 	log.Println("Error occurred while connecting to Jaeger backend: ", err.Error())
