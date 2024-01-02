@@ -90,6 +90,7 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	a.Router.Use(otelmux.Middleware(serviceName))
 
 	tp = otel.Tracer("products-service-otel-trace-frist")
+	// tp = otel.GetTracerProvider().Tracer("products-service-otel-trace-frist")
 	a.initializeRoutes(promHandler)
 	initDB(a.DB)
 	go productToMerchantBatchProcess(a.DB)
