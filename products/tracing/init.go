@@ -14,7 +14,10 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	"go.opentelemetry.io/otel/trace"
 )
+
+var Tracer trace.Tracer
 
 func newResource(ctx context.Context, serviceName, hostName, hostType string) (*resource.Resource, error) {
 	res, err := resource.New(ctx,
@@ -83,6 +86,7 @@ func initOtelTrace(ctx context.Context, exporter sdktrace.SpanExporter, serviceN
 	otel.SetTextMapPropagator(propagator)
 	tracerName := fmt.Sprintf("%s-tracer", serviceName)
 	tp.Tracer(tracerName)
+	Tracer = otel.Tracer(serviceName)
 	// priority := attribute.Key("business.priority")
 	// appEnv := attribute.Key("prod.env")
 	return tp.Shutdown

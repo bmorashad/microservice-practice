@@ -23,7 +23,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -67,7 +66,7 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	m.concurrentExecutions.Set(2)
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 
-	serviceName := "prodcuts-service-trace-v1"
+	serviceName := "prodcuts-service-trace-v2"
 	// serviceVersion := "1.0.0"
 	ctx := context.Background()
 	// shutdown, err := tracing.InitZipkinOtelTrace(ctx, serviceName, "products", "dev")
@@ -90,7 +89,7 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	// a.Router.Use(otelmux.Middleware(serviceName))
 	a.Router.Use(otelmux.Middleware(serviceName))
 
-	tp = otel.Tracer("products-service-otel-trace-frist")
+	// tp = otel.Tracer("products-service-otel-trace-frist")
 	// tp = otel.GetTracerProvider().Tracer("products-service-otel-trace-frist")
 	a.initializeRoutes(promHandler)
 	initDB(a.DB)
@@ -99,7 +98,7 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 
 func initDB(db *sql.DB) {
 	ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
-	ctx, span := tp.Start(ctx, "INIT DATABASE")
+	ctx, span := tracing.Tracer.Start(ctx, "INIT DATABASE")
 	defer span.End()
 	defer cancelFunc()
 	res, err := db.ExecContext(ctx, "CREATE TABLE IF NOT EXISTS products (id int not null auto_increment, name varchar(255), price varchar(255), PRIMARY KEY (id))")
@@ -240,14 +239,16 @@ func logProductCount(db *sql.DB) {
 	}
 }
 
-func productToMerchantBatchProcess(db *sql.DB) {
+func productToMerchantBatchProcess(_ *sql.DB) {
 	uptimeTicker := time.NewTicker(5 * time.Second)
-	for {
-		select {
-		case <-uptimeTicker.C:
-			// sendProductsToMerchant(db)
-		}
+	for range uptimeTicker.C {
+		// sendProductsToMerchant(db)
 	}
+	// for {
+	// 	select {
+	// 	case <-uptimeTicker.C:
+	// 	}
+	// }
 }
 
 func sendProductsToMerchant(db *sql.DB) {
