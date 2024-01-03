@@ -358,7 +358,7 @@ func (a *App) createRandomProducts(w http.ResponseWriter, r *http.Request) {
 	}
 	_handleProductRandomCreation(&wg, &createdProductCount, errMap, productCountChannel, productErrChannel, numOfRandProductsToCreate)
 	failedProductCount := numOfRandProductsToCreate - createdProductCount
-	var statusCode int
+	statusCode := http.StatusOK
 	if failedProductCount > 0 {
 		statusCode = http.StatusExpectationFailed
 	}
