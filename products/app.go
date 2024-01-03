@@ -18,11 +18,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/XSAM/otelsql"
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -43,7 +45,7 @@ var (
 	tp                trace.Tracer
 )
 
-func (a *App) Initializer(user, password, host, port, dbname string) {
+func (a *App) Initializer(user, password, host, port, dbname, serviceName string) {
 	cfg := mysql.Config{
 		Net:    "tcp",
 		User:   user,
@@ -55,7 +57,8 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	log.Println(cfg.FormatDSN())
 
 	var err error
-	a.DB, err = sql.Open("mysql", cfg.FormatDSN())
+	// a.DB, err = sql.Open("mysql", cfg.FormatDSN())
+	a.DB, err = otelsql.Open("mysql", cfg.FormatDSN(), otelsql.WithAttributes(semconv.DBSystemMySQL), otelsql.WithSQLCommenter(true))
 	if err != nil {
 		log.Println("Error occurred while connecting to db:> ", err.Error())
 		log.Fatal(err)
@@ -66,27 +69,7 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 	m.concurrentExecutions.Set(2)
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 
-	serviceName := "prodcuts-service-trace-v2"
-	// serviceVersion := "1.0.0"
-	ctx := context.Background()
-	// shutdown, err := tracing.InitZipkinOtelTrace(ctx, serviceName, "products", "dev")
-	shutdown, err := tracing.InitJaegerOtelTrace(ctx, serviceName, "products", "dev")
-	if err != nil {
-		log.Fatalf("failed to initialize stdouttrace export pipeline: %v", err)
-	}
-	defer shutdown(ctx)
-	// _, err = setupOTelSDK(ctx, serviceName, serviceVersion)
-	// if err != nil {
-	// 	log.Println("Error occurred while connecting to Jaeger backend: ", err.Error())
-	// 	return
-	// }
-	// defer func() {
-	// 	log.Println("Shutting down")
-	// 	err = otelShutdown(ctx)
-	// }()
-
 	a.Router = mux.NewRouter()
-	// a.Router.Use(otelmux.Middleware(serviceName))
 	a.Router.Use(otelmux.Middleware(serviceName))
 
 	// tp = otel.Tracer("products-service-otel-trace-frist")
@@ -97,6 +80,12 @@ func (a *App) Initializer(user, password, host, port, dbname string) {
 }
 
 func initDB(db *sql.DB) {
+	err := otelsql.RegisterDBStatsMetrics(db, otelsql.WithAttributes(
+		semconv.DBSystemMySQL,
+	), otelsql.WithSQLCommenter(true))
+	if err != nil {
+		panic(err)
+	}
 	ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
 	ctx, span := tracing.Tracer.Start(ctx, "INIT DATABASE")
 	defer span.End()
@@ -239,10 +228,10 @@ func logProductCount(db *sql.DB) {
 	}
 }
 
-func productToMerchantBatchProcess(_ *sql.DB) {
+func productToMerchantBatchProcess(db *sql.DB) {
 	uptimeTicker := time.NewTicker(5 * time.Second)
 	for range uptimeTicker.C {
-		// sendProductsToMerchant(db)
+		sendProductsToMerchant(db)
 	}
 	// for {
 	// 	select {

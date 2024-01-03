@@ -78,7 +78,7 @@ func initOtelTrace(ctx context.Context, exporter sdktrace.SpanExporter, serviceN
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(res),
-		// sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 	// defer func() { _ = tp.Shutdown(ctx) }()
 	otel.SetTracerProvider(tp)
